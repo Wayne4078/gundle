@@ -1,0 +1,602 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#FFFFFF">
+<meta name="description" content="제목만 아는 책을 3분 만에 대화용으로. 읽지 말고, 건드리세요.">
+<meta property="og:title" content="건들북 — 읽지 말고, 건드리세요.">
+<meta property="og:description" content="제목만 아는 책을 3분 만에 대화용으로. 양심 가격 0원.">
+<meta property="og:image" content="https://wayne4078.github.io/gundle/assets/og.png">
+<link rel="icon" href="assets/logo.png">
+<link rel="apple-touch-icon" href="assets/logo.png">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>건들북 시안</title>
+<style>
+/* Layout: one phone-width column; home → 5 screens per book → receipt. Product UI: white, Pretendard, one blue. Body text stays MaruBuri. */
+@font-face{font-family:"MaruBuri";src:url(assets/maru-semibold.woff2) format("woff2");font-weight:600;font-display:swap}
+@font-face{font-family:"MaruBuri";src:url(assets/maru-regular.woff2) format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Pretendard";src:url(assets/pretendard-variable.woff2) format("woff2");font-weight:100 900;font-display:swap}
+:root{
+  --paper:#FFFFFF; --paper-2:#F4F6F8; --ink:#191F28; --ink-2:#6B7684; --line:#E5E8EB;
+  --orange:#2F6BFF; --orange-ink:#FFFFFF; --green:#2F6BFF; --sage:#E8F0FF;
+  --receipt:#FFFDF8; --receipt-ink:#222;
+  --serif:"MaruBuri","Noto Serif KR",serif; --sans:"Pretendard","Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#101317; --paper-2:#1B2027; --ink:#F2F4F6; --ink-2:#9AA3AE; --line:#2A3139;
+  --orange:#5B8CFF; --orange-ink:#0B1220; --green:#5B8CFF; --sage:#1F2B40;
+  --receipt:#F7F3EA; --receipt-ink:#222; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#101317; --paper-2:#1B2027; --ink:#F2F4F6; --ink-2:#9AA3AE; --line:#2A3139;
+  --orange:#5B8CFF; --orange-ink:#0B1220; --green:#5B8CFF; --sage:#1F2B40;
+  --receipt:#F7F3EA; --receipt-ink:#222; color-scheme:dark}
+html,body{height:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--paper)}
+*{box-sizing:border-box}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0}
+button:focus-visible,a:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
+.app{max-width:430px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 0}
+.screen{display:none;flex:1;flex-direction:column;padding-block:12px 24px;animation:in .28s ease}
+.screen.on{display:flex}
+@keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.screen{animation:none}.flip .inner{transition:none}}
+
+.bar{display:flex;align-items:center;justify-content:space-between;height:48px;position:sticky;top:env(safe-area-inset-top,0px);background:var(--paper);z-index:5}
+.brand{display:flex;align-items:center;gap:8px;font-weight:800;font-size:19px;letter-spacing:-.02em}
+.brand img{width:30px;height:30px;border-radius:8px}
+.brand i{color:var(--orange);font-style:normal}
+.back{font-size:15px;color:var(--ink-2);display:flex;align-items:center;gap:4px}
+.timer{font-variant-numeric:tabular-nums;font-size:13px;color:var(--ink-2);display:flex;align-items:center;gap:6px}
+.timer b{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--orange)}
+.pill{font-size:12px;color:var(--ink-2);background:var(--paper-2);border-radius:6px;padding:4px 8px}
+.crumb{font-size:13px;color:var(--ink-2);letter-spacing:.04em;text-transform:uppercase}
+.crumb .bt{font-family:var(--serif);font-weight:600;font-size:15px;color:var(--ink);letter-spacing:0}
+
+.hero{padding-block:18px 6px}
+.hero h1{font-weight:800;font-size:27px;line-height:1.3;margin:0 0 8px;letter-spacing:-.02em;text-wrap:balance}
+.hero p{margin:0;color:var(--ink-2);font-size:14.5px}
+.chips{display:flex;gap:4px;background:var(--paper-2);border-radius:12px;padding:4px;margin-block:16px 6px}
+.chip{flex:1;border:0;border-radius:9px;padding:11px 4px;font-size:15px;font-weight:600;color:var(--ink-2);background:transparent;min-height:44px;text-align:center}
+.chip.on{background:var(--paper);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.chiplabel{font-size:13.5px;color:var(--ink-2);margin-top:4px;padding-left:4px}
+.today{margin-top:18px;display:grid;grid-template-columns:96px 1fr;gap:16px;align-items:center;background:var(--paper-2);border-radius:16px;padding:16px}
+.cover{aspect-ratio:3/4;max-width:100%;border-radius:8px;background:var(--c,#C9CFB2);color:var(--ci,#1E2F24);padding:12px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 4px 12px rgba(0,0,0,.08);position:relative;overflow:hidden}
+.cover .t{font-family:var(--serif);font-size:24px;font-weight:600;line-height:1}
+.cover .a{font-size:11px;opacity:.75}
+.cover .e{position:absolute;right:-10px;bottom:14px;width:70px;height:92px;border-radius:50%;border:1.5px solid currentColor;opacity:.5;transform:rotate(18deg)}
+.cover .e2{position:absolute;right:4px;bottom:0;width:60px;height:80px;border-radius:50%;background:currentColor;opacity:.2;transform:rotate(18deg)}
+.today .k{font-size:12px;color:var(--ink-2)}
+.today h2{font-size:19px;margin:2px 0 2px;font-weight:800;letter-spacing:-.01em}
+.today h2 small{font-weight:500;font-size:13px;color:var(--ink-2);margin-left:5px}
+.today p{margin:0 0 10px;font-size:13px;color:var(--ink-2);line-height:1.45}
+.cta{display:flex;align-items:center;justify-content:space-between;width:100%;background:var(--orange);color:var(--orange-ink);border-radius:10px;padding:12px 14px;font-size:15px;font-weight:700}
+.cta span{opacity:.7;font-weight:500;font-size:14px}
+.cta .ttl{font-family:var(--serif);font-weight:600;font-size:18px;opacity:1;margin-right:2px}
+.cta{flex-wrap:wrap;row-gap:2px}
+.cta:active{transform:scale(.99)}
+.meta{font-size:12.5px;color:var(--ink-2);margin-top:8px}
+.shelf{margin-top:26px}
+.shelf h3{margin:0 0 4px;font-size:16px;font-weight:800;display:flex;justify-content:space-between;align-items:baseline}
+.shelf h3 span{font-size:13px;color:var(--orange);font-weight:600}
+.shelfrow{display:flex;flex-direction:column}
+.shelfrow::-webkit-scrollbar{display:none}
+.mini{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);text-align:left;width:100%}
+.mini .cover{width:44px;padding:4px;border-radius:5px;box-shadow:none;flex:0 0 auto}.mini .cover .t{font-size:11px}.mini .cover .e,.mini .cover .e2{display:none}
+.mini .n{font-size:15px;color:var(--ink);font-weight:700}.mini .n small{display:block;font-size:12px;color:var(--ink-2);font-weight:500;margin-top:1px}.mini .tag{margin-left:auto;font-size:11.5px;font-weight:600;color:var(--orange);background:var(--sage);border-radius:6px;padding:3px 7px;white-space:nowrap}
+.mini.soon .cover{background:var(--paper-2);color:var(--ink-2);border:1px dashed var(--line)}.mini.soon .n{color:var(--ink-2);font-weight:500}
+.mini.soon .cover .e,.mini.soon .cover .e2{display:none}
+.foot{margin-top:auto;padding-top:24px;font-size:12px;color:var(--ink-2);display:flex;justify-content:space-between}
+
+.page{flex:1}
+.page h2{font-weight:800;font-size:24px;line-height:1.3;margin:12px 0 16px;letter-spacing:-.02em;text-wrap:balance}
+.read{font-family:var(--serif);font-weight:600;font-size:18px;line-height:1.8;max-width:34em}
+.read p{margin:0 0 14px}
+.people{display:flex;flex-direction:column;gap:12px;margin:0 0 18px}
+.person{display:grid;grid-template-columns:44px 1fr;gap:12px;align-items:start}
+.person .av{width:44px;height:44px;border-radius:50%;background:var(--paper-2);border:1px solid var(--line);display:grid;place-items:center;font-family:var(--serif);font-weight:600;font-size:17px}
+.person .av.lead{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.person b{font-family:var(--serif);font-weight:600;font-size:17px;display:block}
+.person small{font-size:12px;color:var(--orange);font-weight:600;margin-left:6px}
+.person span{font-size:14px;color:var(--ink-2);line-height:1.5;display:block}
+.joke{font-family:var(--serif);font-weight:600;font-size:18px;line-height:1.5;background:var(--paper-2);border-radius:12px;padding:14px 16px;margin:20px 0 10px}
+.note{font-size:13.5px;color:var(--ink-2)}
+
+.point{border-top:1px solid var(--line);padding:16px 0}
+.point:last-of-type{border-bottom:1px solid var(--line)}
+.point h3{font-family:var(--serif);font-weight:600;font-size:19px;margin:0 0 6px;display:flex;gap:10px;align-items:baseline}
+.point h3 em{font-style:normal;font-family:var(--sans);font-size:12px;color:var(--orange);font-weight:700}
+.point h3{font-family:var(--sans);font-weight:800;font-size:17px}
+.point p{margin:0;font-family:var(--serif);font-weight:600;font-size:17px;line-height:1.7}
+.more{margin-top:10px;font-size:14px;color:var(--green);font-weight:700;display:flex;align-items:center;gap:6px}
+.more::after{content:"";width:7px;height:7px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg);transition:transform .2s;margin-top:-3px}
+.more[aria-expanded="true"]::after{transform:rotate(-135deg);margin-top:3px}
+.deep{margin-top:10px;padding:12px 14px;background:var(--paper-2);border-radius:10px;font-size:14.5px;line-height:1.65;color:var(--ink)}
+.deep b{color:var(--green)}
+
+.presetbar{display:flex;gap:6px;margin:4px 0 16px;flex-wrap:wrap}
+.presetbar .chip{padding:9px 15px;font-size:15px;min-height:40px}
+.linecard{background:var(--paper-2);border-radius:16px;padding:18px 16px 14px;margin-bottom:12px}
+.linecard .k{font-size:13.5px;color:var(--ink-2);margin-bottom:8px}
+.linecard .l{font-family:var(--serif);font-weight:600;font-size:20px;line-height:1.6;margin:0 0 14px}
+.linecard .row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.copy{border:0;border-radius:8px;padding:9px 14px;font-size:14px;font-weight:700;background:var(--orange);color:var(--orange-ink)}
+.next{font-size:14px;color:var(--ink-2)}
+.next b{color:var(--ink)}
+.votes{display:flex;gap:10px;margin-top:18px}
+.vote{flex:1;border:0;background:var(--paper-2);border-radius:12px;padding:12px;text-align:center;font-size:14px;font-weight:700}
+.vote .n{display:block;font-size:22px;font-variant-numeric:tabular-nums;letter-spacing:-.02em;margin-top:2px}
+.vote.on{border-color:var(--orange);background:var(--orange);color:var(--orange-ink)}
+.vote.on2{border-color:var(--ink);background:var(--ink);color:var(--paper)}
+.voten{font-size:13px;color:var(--ink-2);margin-top:8px}
+
+.prob{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;color:var(--ink-2);margin-bottom:8px}
+.prob b{font-size:28px;color:var(--ink);font-variant-numeric:tabular-nums;letter-spacing:-.02em;font-family:var(--serif)}
+.probbar{height:6px;border-radius:3px;background:var(--paper-2);overflow:hidden;margin-bottom:18px}
+.probbar i{display:block;height:100%;background:var(--orange);width:12%;transition:width .5s cubic-bezier(.2,.8,.2,1)}
+.flips{display:flex;flex-direction:column;gap:12px}
+.flip{perspective:1200px;width:100%;text-align:left}
+.flip .inner{position:relative;transition:transform .55s cubic-bezier(.2,.8,.2,1);transform-style:preserve-3d;min-height:210px}
+.flip.open .inner{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:14px;padding:16px 18px;display:flex;flex-direction:column;justify-content:space-between}
+.face.f{background:var(--ink);color:var(--paper)}
+.face.f .k{font-size:12px;opacity:.65}
+.face.f .qq{font-family:var(--serif);font-weight:600;font-size:19px;line-height:1.45;margin:8px 0}
+.face.f .tap{font-size:12px;opacity:.65;display:flex;justify-content:space-between}
+.face.b{background:var(--paper-2);color:var(--ink);transform:rotateY(180deg);border:1px solid var(--line)}
+.face.b .k{font-size:12px;color:var(--orange);font-weight:700}
+.face.b .aa{font-size:14.5px;line-height:1.6;margin:6px 0 8px}
+.face.b .esc{font-family:var(--serif);font-weight:600;font-size:15px;line-height:1.5;border-top:1px dashed var(--line);padding-top:8px}
+.face.b .esc small{display:block;font-family:var(--sans);font-weight:500;font-size:11px;color:var(--ink-2);margin-bottom:2px}
+.flip.locked .face.f{background:var(--sage);color:var(--ink)}
+.flip.locked .face.f .k{opacity:.8}
+.flip.locked .face.f .tap{opacity:.9;font-weight:700}
+
+.nav{position:sticky;bottom:0;background:var(--paper);padding-block:10px calc(10px + env(safe-area-inset-bottom,0px));display:grid;grid-template-columns:1fr auto 1fr;align-items:center;border-top:1px solid var(--line);margin-top:20px}
+.nav .pg{font-size:13px;color:var(--ink-2);text-align:center;font-variant-numeric:tabular-nums}
+.nav .pg b{color:var(--ink)}
+.nav button{font-size:15px;font-weight:700;padding:10px 0}
+.nav .prev{text-align:left;color:var(--ink-2)}
+.nav .go{text-align:right;color:var(--orange)}
+.nav .go.fin{color:var(--ink)}
+
+.rwrap{display:flex;flex-direction:column;align-items:center;gap:16px;padding-top:6px}
+.receipt{width:100%;max-width:340px;background:var(--receipt);color:var(--receipt-ink);padding:22px 20px 26px;font-family:var(--sans);font-size:13.5px;line-height:1.7;font-variant-numeric:tabular-nums;box-shadow:0 14px 30px rgba(0,0,0,.18);position:relative;
+  -webkit-mask:linear-gradient(#000,#000) top/100% calc(100% - 10px) no-repeat, radial-gradient(circle at 7px 100%,transparent 6px,#000 6.5px) bottom/14px 10px repeat-x; mask:linear-gradient(#000,#000) top/100% calc(100% - 10px) no-repeat, radial-gradient(circle at 7px 100%,transparent 6px,#000 6.5px) bottom/14px 10px repeat-x}
+.receipt .h{text-align:center;margin-bottom:10px}
+.receipt .h b{display:block;font-size:19px;letter-spacing:.1em;font-weight:800}
+.receipt .h span{font-size:11.5px;color:#666;display:block}
+.receipt hr{border:0;border-top:1.5px dashed #999;margin:10px 0}
+.receipt .ttl{font-family:var(--serif);font-weight:600;font-size:17px;display:flex;justify-content:space-between;align-items:baseline}
+.receipt .ttl small{font-family:var(--sans);font-weight:500;font-size:12px;color:#666}
+.receipt .r{display:flex;justify-content:space-between;gap:8px}
+.receipt .r .d{flex:1;border-bottom:1.5px dotted #bbb;margin:0 6px 6px;min-width:12px}
+.receipt .r.danger{display:block;margin-top:6px}
+.receipt .r.danger span{display:block;font-size:11.5px;color:#666}
+.receipt .r.danger q{quotes:none;font-family:var(--serif);font-weight:600;font-size:14.5px}
+.receipt .tot{font-weight:800;font-size:16px}
+.receipt .tot .d{border-bottom-style:solid;border-color:#333}
+.receipt .bc{height:44px;margin:14px 0 6px;background:repeating-linear-gradient(90deg,#222 0 2px,transparent 2px 4px,#222 4px 5px,transparent 5px 8px,#222 8px 11px,transparent 11px 13px,#222 13px 14px,transparent 14px 18px)}
+.receipt .tag{text-align:center;font-size:11.5px;color:#444}
+.receipt .tag b{display:block;font-size:13px;color:#222;letter-spacing:.02em}
+.receipt .fine{font-size:10.5px;color:#888;text-align:center;margin-top:8px}
+.racts{display:flex;gap:10px;width:100%;max-width:340px}
+.racts button{flex:1;border:1px solid var(--line);border-radius:12px;padding:12px;font-size:14px;font-weight:700;background:var(--paper)}
+.racts button.pri{background:var(--orange);color:var(--orange-ink);border-color:var(--orange)}
+.rhint{font-size:12.5px;color:var(--ink-2);text-align:center;max-width:340px}
+.rlinks{display:flex;flex-direction:column;gap:10px;width:100%;max-width:340px;margin-top:10px;font-size:15px}
+.rlinks a,.rlinks button{color:var(--ink);text-decoration:none;display:flex;justify-content:space-between;font-weight:600;border-top:1px solid var(--line);padding-top:10px;text-align:left}
+.rlinks small{color:var(--ink-2);font-weight:500}
+.poll{width:100%;max-width:340px;margin-top:10px;border:1.5px dashed var(--line);border-radius:14px;padding:14px 16px}
+.poll .k{font-size:12px;color:var(--ink-2)}
+.poll .q{font-family:var(--serif);font-weight:600;font-size:18px;margin:4px 0 10px}
+.poll .opts{display:flex;gap:8px}
+.poll .opt{flex:1;border:1.5px solid var(--line);border-radius:10px;padding:10px;font-size:14px;font-weight:700;min-height:44px}
+.poll .opt.on{background:var(--orange);color:var(--orange-ink);border-color:var(--orange)}
+.poll .pn{font-size:12.5px;color:var(--ink-2);margin-top:8px}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:999px;font-size:14px;opacity:0;transition:.25s;pointer-events:none;z-index:20;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%)}
+</style>
+
+</head>
+<body>
+<div class="app">
+
+<section class="screen on" id="home">
+  <div class="bar">
+    <div class="brand"><img src="assets/logo.png" alt="">건들북<i>.</i></div>
+    <div class="pill">안 읽어도 됩니다</div>
+  </div>
+  <div class="hero">
+    <h1>오늘 대화에 나올 책,<br>3분 만에 챙기기</h1>
+    <p>제목만 아는 책을 대화용으로 요약해 드려요. 읽는 게 아니라 살짝 건드리는 거라.</p>
+  </div>
+  <div class="chips" id="presets" role="radiogroup" aria-label="오늘 상황"></div>
+  <div class="chiplabel" id="presetlabel"></div>
+  <div class="today" id="today"></div>
+  <div class="shelf">
+    <h3>이번 주 많이 물어본 책 <span>전체</span></h3>
+    <div class="shelfrow" id="shelf"></div>
+  </div>
+  <div class="shelf" id="movieshelf" hidden>
+    <h3>건들무비 <span>예고편만 완람한 것들</span></h3>
+    <div class="shelfrow" id="shelf2"></div>
+  </div>
+  <div class="foot"><span>내용은 쓸 만하게, 태도는 가볍게.</span><span>ARINPLAY</span></div>
+</section>
+
+<section class="screen" id="who">
+  <div class="bar"><button class="back" data-go="home">‹ 책장</button><div class="timer"><b></b><span class="tm">0:00</span></div></div>
+  <div class="page">
+    <div class="crumb"><span class="bt"></span> · 1 / 5</div>
+    <h2>누가 누구인지만<br>챙기면 됩니다.</h2>
+    <div class="people" id="people"></div>
+    <div class="read"><p id="summary"></p></div>
+    <div class="joke" id="joke"></div>
+    <div class="note" id="whonote"></div>
+  </div>
+  <div class="nav"><button class="prev" data-go="home">책장</button><div class="pg"><b>1</b> / 5</div><button class="go" data-go="three">다음 ›</button></div>
+</section>
+
+<section class="screen" id="three">
+  <div class="bar"><button class="back" data-go="who">‹ 이전</button><div class="timer"><b></b><span class="tm">0:00</span></div></div>
+  <div class="page">
+    <div class="crumb"><span class="bt"></span> · 2 / 5</div>
+    <h2>이거 세 개만<br>기억하세요.</h2>
+    <div id="points"></div>
+    <div class="note" style="margin-top:14px">두 개까지만 외우세요. 세 개 다 말하면 의심받습니다.</div>
+  </div>
+  <div class="nav"><button class="prev" data-go="who">‹ 이전</button><div class="pg"><b>2</b> / 5</div><button class="go" data-go="line">다음 ›</button></div>
+</section>
+
+<section class="screen" id="line">
+  <div class="bar"><button class="back" data-go="three">‹ 이전</button><div class="timer"><b></b><span class="tm">0:00</span></div></div>
+  <div class="page">
+    <div class="crumb"><span class="bt"></span> · 3 / 5</div>
+    <h2>이거 하나만<br>외우세요.</h2>
+    <div class="presetbar" id="presets2"></div>
+    <div class="linecard">
+      <div class="k" id="lk"></div>
+      <p class="l" id="ll"></p>
+      <div class="row"><button class="copy" id="copyline">문장 복사</button><div class="next" id="ln"></div></div>
+    </div>
+    <div class="votes">
+      <button class="vote" id="v1">통했다<span class="n">0</span></button>
+      <button class="vote" id="v2">걸렸다<span class="n">0</span></button>
+    </div>
+    <div class="voten">써보신 분들의 투표입니다. 숫자는 시안용 예시입니다.</div>
+  </div>
+  <div class="nav"><button class="prev" data-go="three">‹ 이전</button><div class="pg"><b>3</b> / 5</div><button class="go" data-go="test">다음 ›</button></div>
+</section>
+
+<section class="screen" id="test">
+  <div class="bar"><button class="back" data-go="line">‹ 이전</button><div class="timer"><b></b><span class="tm">0:00</span></div></div>
+  <div class="page">
+    <div class="crumb"><span class="bt"></span> · 4 / 5 · 걸림 테스트</div>
+    <h2>진짜 읽은 사람이<br>나타났습니다.</h2>
+    <div class="prob"><span>생존 확률</span><b id="prob">12%</b></div>
+    <div class="probbar"><i id="probbar"></i></div>
+    <div class="flips" id="flips"></div>
+    <div class="note" style="margin-top:14px" id="testnote">세 장 다 뒤집으면 영수증이 나옵니다.</div>
+  </div>
+  <div class="nav"><button class="prev" data-go="line">‹ 이전</button><div class="pg"><b>4</b> / 5</div><button class="go fin" data-go="receipt">영수증 ›</button></div>
+</section>
+
+<section class="screen" id="receipt">
+  <div class="bar"><button class="back" data-go="test">‹ 이전</button><div class="crumb">5 / 5</div></div>
+  <div class="rwrap">
+    <div class="receipt" id="rc">
+      <div class="h"><b id="rhead">건들북 영수증</b><span id="rno"></span></div>
+      <hr>
+      <div class="ttl"><span id="rtitle"></span><small id="rauthor"></small></div>
+      <hr>
+      <div id="rrows"></div>
+      <hr>
+      <div class="r"><span>양심 가격</span><span class="d"></span><span>0원</span></div>
+      <div class="r tot"><span>합계</span><span class="d"></span><span>0원</span></div>
+      <div class="bc"></div>
+      <div class="tag"><b>내용은 쓸 만하게, 태도는 가볍게.</b>gundle.app</div>
+      <div class="fine" id="rfine">* 예상 버티는 시간은 농담입니다. 진짜 읽으면 무제한.</div>
+    </div>
+    <div class="racts"><button class="pri" id="copyrc">텍스트로 복사</button><button data-go="home">다른 책도 3분</button></div>
+    <div class="rhint" id="rhint">스크린샷해서 스레드·스토리에 올리세요. 자백이 밈입니다.</div>
+    <div class="poll">
+      <div class="k">한 가지만 여쭐게요</div>
+      <div class="q">건들무비, 나와도 될까요?</div>
+      <div class="opts"><button class="opt" data-poll="yes">보고 싶다</button><button class="opt" data-poll="no">책이면 충분</button></div>
+      <div class="pn" id="polln">영화는 개봉 첫 주에만 챙겨드릴 수 있어서, 수요를 먼저 봅니다.</div>
+    </div>
+    <div class="rlinks">
+      <a id="rstore" href="#" target="_blank" rel="noopener">여기까지 왔으면 그냥 읽으세요 <small>서점 ↗</small></a>
+      <button data-go="who"><span id="rrestart"></span> <small>1 / 5</small></button>
+    </div>
+  </div>
+</section>
+
+</div>
+<div class="toast" id="toast">복사했습니다</div>
+
+<script>
+(function(){
+  var $=function(s,r){return (r||document).querySelector(s)};
+  var $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
+
+  var PRESETS={
+    date:{name:"소개팅",label:"상대 인스타에 이 책 사진이 있었습니다.",k:"소개팅 · 상대 인스타에 이 책이 있었을 때"},
+    work:{name:"회식",label:"부장님이 「이거 읽어봐」 하셨습니다.",k:"회식 · 상사가 추천한 책일 때"},
+    club:{name:"독서모임",label:"내일인데 아직 못 읽었습니다.",k:"독서모임 · 내일인데 못 읽었을 때"},
+    reply:{name:"댓글창",label:"스레드에서 이 책 얘기가 돌고 있습니다.",k:"댓글창 · 스레드·인스타 한 줄"}
+  };
+
+  var BOOKS={
+    mosun:{
+      title:"모순",author:"양귀자",tag:"28년째 순위권",cover:{c:"#C9CFB2",ci:"#1E2F24",sub:"같은 얼굴,<br>서로 다른 인생."},shelf:"요즘 그 책",
+      tagline:"인생을 이해하려고 펼쳤는데, 이해할 사람이 늘어났습니다.",meta:"결말은 열고 싶을 때만 · 양심 가격 0원",
+      people:[
+        {n:"안진진",r:"주인공 · 25세",d:"자기 인생을 한번 들여다보기로 한 사람.",lead:1},
+        {n:"엄마",d:"고된 일상을 억척스럽게 꾸려갑니다."},
+        {n:"이모",r:"엄마의 일란성 쌍둥이",d:"같은 얼굴인데 풍족한 삶. 여기서 책이 시작됩니다."},
+        {n:"김장우",d:"진진이 마음 끌리는 남자. 감성적이고 자유로운 편."},
+        {n:"나영규",d:"진진이 결혼을 고민하는 남자. 계획적이고 안정적인 편."}],
+      summary:"진진은 똑같이 생겼지만 전혀 다른 삶을 사는 엄마와 이모를 바라봅니다. 한편으로는 김장우와 나영규 사이에서 자기 사랑과 결혼을 고민합니다. 남의 삶을 이해하는 일과 내 삶을 선택하는 일이 얼마나 다른지 따라가는 소설입니다.",
+      joke:"인생을 이해하려고 펼쳤는데,<br>이해할 사람이 늘어났습니다.",
+      whonote:"여기서 나가셔도 됩니다. 이미 제목만 알던 때와는 다릅니다.",
+      points:[
+        {t:"엄마와 이모",p:"같은 얼굴, 다른 삶. 고된 삶과 풍족한 삶의 대비가 이 책의 출발점입니다.",deep:"<b>주의.</b> 이 대비를 「가난이 행복하다」나 「돈은 쓸모없다」로 결론 내리면 작품이 납작해집니다. 책은 어느 쪽이 행복했는지 끝까지 답하지 않습니다. 그 질문을 독자에게 넘기는 게 구조입니다."},
+        {t:"두 남자와 진진",p:"김장우와 나영규는 서로 다른 삶의 가능성입니다. 한쪽은 사랑, 한쪽은 돈이라는 공식으로는 설명이 안 됩니다.",deep:"<b>관점.</b> 두 남자보다 엄마·이모 구도를 먼저 놓고 보면, 진진의 결혼이 연애의 결론인지 앞 세대 삶의 반복인지가 보입니다. 반드시 반복이라고 결론 낼 필요는 없습니다. 무엇과 무엇을 잇는지만 말할 수 있으면 됩니다."},
+        {t:"제목의 범위",p:"모순은 진진의 선택에만 있는 게 아닙니다. 남의 삶을 밖에서 판단하는 우리 시선에도 있습니다.",deep:"<b>써먹기.</b> 「인생은 원래 모순이야」로 끝내면 편하지만 대화가 끊깁니다. 어떤 선택에서 왜 모순을 느꼈는지 하나만 말하면 대화가 이어집니다."}],
+      lines:{
+        date:{line:"저는 두 남자보다 엄마랑 이모, 쌍둥이 구도가 더 재밌더라고요. 혹시 누구 편이셨어요?",next:"질문으로 끝내면 상대가 말합니다. <b>그때 들으세요.</b>"},
+        work:{line:"쌍둥이인데 삶이 완전 다르잖아요. 그 대비가 묘하더라고요.",next:"이어서: <b>「부장님은 어떻게 읽으셨어요?」</b> 그리고 고기 드세요."},
+        club:{line:"진진의 선택을 이해하는 거랑 동의하는 게 같은지, 그게 제일 궁금했어요.",next:"질문 하나 던지고 <b>듣기 모드</b>로 전환. 메모하는 척이 좋습니다."},
+        reply:{line:"모순 읽고 엄마·이모 생각에 한참 멍 때림. 이해랑 동의는 다른 거더라.",next:"짧게. <b>안 읽은 티는 길이에서 납니다.</b>"}},
+      votes:[312,41],
+      questions:[
+        {q:"「엄마랑 이모 중에 누가 더 행복했다고 봐요?」",a:"책은 끝까지 답을 안 줍니다. 그래서 「누가 더」로 답하는 순간 안 읽은 티가 납니다. 질문을 돌려주세요.",esc:"그걸 정하는 순간 책이 납작해지는 느낌이라, 저는 못 정하겠더라고요. 어느 쪽이셨어요?"},
+        {q:"「제목이 왜 모순이에요?」",a:"진진의 선택만이 아니라, 남의 삶을 밖에서 판단하는 시선에도 모순이 있다는 쪽으로. 한 문장이면 충분합니다.",esc:"읽는 사람마다 모순을 다른 데서 찾더라고요. 저는 보는 쪽에서 찾았고요."},
+        {q:"「진진은 결국 누구랑 결혼해요?」",locked:1,a:"이모가 세상을 떠난 뒤, 진진은 나영규와 결혼하기로 합니다. 「결국 조건을 택한 거네요」가 다음 질문입니다.",esc:"그 선택을 이해는 했는데 동의는 못 하겠더라고요. 그 둘이 같을 수 있나 싶어서요."}],
+      danger:"「진진 선택, 동의하세요?」",hold:[4,6,8,11],
+      store:"https://www.yes24.com/Product/Goods/8759796"
+    },
+    demian:{
+      title:"데미안",author:"헤르만 헤세",tag:"고전",cover:{c:"#D9633B",ci:"#FFF3EA",sub:"새는 알을 깨고,<br>우리는 침묵을 깹니다."},shelf:"제목만 완독",
+      tagline:"부모님 말씀 잘 듣던 애가, 생각이 너무 많은 친구를 만났습니다.",meta:"주인공은 데미안이 아닙니다 · 양심 가격 0원",
+      people:[
+        {n:"싱클레어",r:"주인공 · 화자",d:"착하게 살아온 소년. 자기가 믿던 세계를 의심하기 시작합니다.",lead:1},
+        {n:"데미안",r:"제목의 그 사람",d:"싱클레어의 생각을 흔드는 친구. 주인공이 아니라는 게 첫 번째 함정입니다."},
+        {n:"크로머",d:"동네 불량소년. 어린 싱클레어를 협박해 「어두운 세계」를 처음 보여줍니다."},
+        {n:"피스토리우스",d:"오르간 연주자. 싱클레어에게 아브락사스를 가르칩니다."},
+        {n:"에바 부인",r:"데미안의 어머니",d:"싱클레어에게 이상이자 상징으로 다가오는 인물. 연애 상대로만 말하면 좁습니다."}],
+      summary:"착하게 살아온 싱클레어는 데미안을 만나 당연하게 믿었던 선과 악의 구분을 의심하기 시작합니다. 여러 만남과 혼란을 겪으며, 남들이 정해준 답보다 자기 자신을 찾아가는 이야기입니다.",
+      joke:"부모님 말씀 잘 듣던 애가,<br>생각이 너무 많은 친구를 만났습니다.",
+      whonote:"제목은 《데미안》, 주인공은 싱클레어. 이것만 알아도 절반은 왔습니다.",
+      points:[
+        {t:"알을 깨는 새",p:"익숙하고 안전한 세계를 깨고 나오는 성장의 상징. 이 책에서 제일 유명한 이미지입니다.",deep:"<b>주의.</b> 달걀 이야기를 오래 하면 안 됩니다. 「알은 세계이고, 태어나려면 세계를 깨야 한다」는 흐름만 기억하세요. 그 새가 날아가는 곳이 아브락사스입니다. 두 포인트가 한 문장으로 이어집니다."},
+        {t:"아브락사스",p:"선과 악을 함께 아우르는 신적 존재. 「착한 것만이 전부가 아니다」를 한 단어로 압축한 이름입니다.",deep:"<b>관점.</b> 헤세는 밝은 세계(부모·교회)와 어두운 세계(크로머)를 둘 다 겪게 한 뒤, 둘을 다 품는 상징으로 아브락사스를 둡니다. 「선악을 넘어선다」가 아니라 「둘 다 내 것으로 인정한다」에 가깝습니다."},
+        {t:"카인의 표식",p:"데미안은 카인을 「남들과 다른 사람」으로 다시 읽습니다. 싱클레어가 처음 흔들리는 지점입니다.",deep:"<b>써먹기.</b> 「카인 얘기 어떻게 읽으셨어요?」가 이 책의 진짜 꼬리질문입니다. 「성경 뒤집기」로 답하면 얕고, 「남들이 정해준 해석을 의심하는 첫 장면」이라고 하면 됩니다."}],
+      lines:{
+        date:{line:"저는 데미안보다 싱클레어가 더 보이더라고요. 흔들리는 쪽이 주인공이잖아요. 혹시 어느 장면이 남으셨어요?",next:"질문으로 끝내면 상대가 말합니다. <b>그때 들으세요.</b>"},
+        work:{line:"착하게 사는 거랑 자기답게 사는 게 같지는 않더라고요. 그게 남았어요.",next:"이어서: <b>「부장님은 언제 읽으셨어요?」</b> 보통 군대 얘기가 나옵니다."},
+        club:{line:"아브락사스를 「선악을 넘는다」로 읽는지 「둘 다 품는다」로 읽는지, 거기서 갈리더라고요.",next:"질문 하나 던지고 <b>듣기 모드</b>로 전환."},
+        reply:{line:"데미안 다시 읽음. 10대 땐 데미안이 멋있었는데 지금은 싱클레어가 안쓰러움.",next:"짧게. <b>「다시 읽음」은 안 읽은 사람의 최고 방어입니다.</b>"}},
+      votes:[528,67],
+      questions:[
+        {q:"「에바 부인은 어떻게 보셨어요?」",a:"데미안의 어머니이자, 싱클레어가 찾던 이상의 상징입니다. 「연애 상대」로만 답하면 좁고, 「도달하고 싶은 자기 자신의 모습」이라고 하면 됩니다.",esc:"그 부분은 아직 정리가 덜 됐어요. 어떻게 읽으셨어요?"},
+        {q:"「새가 날아가는 곳이 어디라고 했죠?」",a:"아브락사스입니다. 「알은 세계, 태어나려면 세계를 깨야 한다, 새는 신에게 날아간다, 그 신의 이름이 아브락사스」 흐름만 알면 됩니다.",esc:"아브락사스요. 그 이름이 왜 거기 붙었는지가 더 궁금하긴 했어요."},
+        {q:"「마지막에 데미안은 어떻게 돼요?」",locked:1,a:"전쟁에 나간 두 사람이 야전병원에서 만납니다. 데미안은 에바 부인의 입맞춤을 전하고 사라지고, 싱클레어는 자기 안에서 데미안을 발견합니다.",esc:"결말은 데미안이 사라지는 게 아니라 싱클레어 안으로 들어가는 거라고 읽었어요."}],
+      danger:"「카인 얘기, 어떻게 읽으셨어요?」",hold:[5,7,9,12],
+      store:"https://www.yes24.com/Product/Goods/2342"
+    },
+    boy:{
+      title:"소년이 온다",author:"한강",tag:"노벨상",cover:{c:"#3C4A5C",ci:"#EEF1F5",sub:"1980년 5월,<br>광주."},shelf:"사뒀는데 못 읽음",
+      tagline:"농담을 준비했는데, 이 책 앞에서는 접었습니다.",meta:"가볍게 건드리기 어려운 책 · 그래도 출발점은 드립니다",
+      people:[
+        {n:"동호",r:"중학교 3학년",d:"친구 정대가 총에 맞는 걸 본 뒤, 도청 상무관에서 시신 수습을 돕습니다.",lead:1},
+        {n:"정대",r:"동호의 친구",d:"5월 21일 도청 앞 발포 때 쓰러집니다. 2장은 정대의 넋이 말합니다."},
+        {n:"은숙",r:"당시 여고생",d:"상무관에서 동호와 함께 일합니다. 몇 년 뒤 서울의 출판사 편집자가 됩니다."},
+        {n:"진수",r:"당시 대학생",d:"도청에 남았던 청년. 고문과 수감을 거쳐 돌아오지만 끝내 버티지 못합니다."},
+        {n:"선주",r:"미싱사",d:"노동운동으로 해고된 적이 있는 여성. 진압 뒤 경찰서에서 고문을 당합니다."},
+        {n:"동호 엄마",d:"6장의 화자. 아들을 잃은 뒤의 시간을 말합니다."}],
+      summary:"1980년 5월 광주. 계엄군의 발포로 친구를 잃은 중학생 동호는 도청 상무관에서 시신을 돌보는 일을 돕다가, 마지막 날 도청에 남습니다. 소설은 동호와 그 곁에 있던 사람들이 그 뒤로 어떻게 살았는지를 장마다 다른 목소리로 따라갑니다.",
+      joke:"농담을 준비했는데,<br>이 책 앞에서는 접었습니다.",
+      whonote:"이 책은 「안 읽었는데 아는 척」이 제일 잘 들키는 책입니다. 차라리 「아직 못 읽었다」고 말하는 게 통합니다.",
+      points:[
+        {t:"장마다 화자가 바뀝니다",p:"1장은 동호에게 말을 거는 「너」, 2장은 죽은 정대의 넋, 3~6장은 살아남은 사람들의 그 뒤입니다.",deep:"<b>구조.</b> 사건을 따라가는 소설이 아니라, 한 사건이 여러 사람의 남은 삶에 어떻게 남았는지를 따라가는 소설입니다. 「누가 죽었나」보다 「누가 어떻게 살아남았나」가 축입니다."},
+        {t:"넋이 말하는 2장",p:"죽은 정대가 자기 몸이 쌓인 곳에서 말합니다. 이 책에서 가장 많이 언급되는 장입니다.",deep:"<b>관점.</b> 죽은 사람이 화자가 되는 순간, 「희생자 수」라는 숫자가 한 명 한 명으로 돌아옵니다. 작가가 이 장을 쓴 이유를 그렇게 설명하는 독자가 많습니다. 단정하지 말고 「저는 그렇게 읽었다」로 말하세요."},
+        {t:"제목의 뜻",p:"죽은 소년이 지금 여기로 「온다」. 끝난 일이 아니라는 뜻으로 읽힙니다.",deep:"<b>써먹기.</b> 에필로그에서 작가가 직접 동호의 흔적을 찾아갑니다. 「과거형이 아니라 현재형 제목」이라는 한마디면 충분합니다. 2024년 노벨문학상 이후 가장 많이 팔린 한강의 책이기도 합니다."}],
+      lines:{
+        date:{line:"저는 이 책은 가볍게 얘기가 안 되더라고요. 어느 장이 제일 오래 남으셨어요?",next:"솔직한 쪽이 통합니다. <b>이 책만큼은 아는 척보다 묻는 쪽.</b>"},
+        work:{line:"2장, 죽은 아이가 말하는 부분에서 한참 못 넘겼어요.",next:"더 말하지 마세요. <b>이 책은 짧게 말할수록 진짜처럼 들립니다.</b>"},
+        club:{line:"「온다」가 현재형인 게 계속 걸리더라고요. 끝난 일이 아니라는 뜻 같아서요.",next:"질문 하나 던지고 <b>듣기 모드</b>로 전환. 이 책 모임은 듣는 사람이 이깁니다."},
+        reply:{line:"소년이 온다, 사놓고 1년 묵힘. 2장 넘기는 데 일주일 걸림.",next:"짧게. <b>못 읽었다는 고백이 이 책에서는 제일 안전합니다.</b>"}},
+      votes:[204,12],
+      questions:[
+        {q:"「어느 장이 제일 힘들었어요?」",a:"정답은 없지만 2장(정대의 넋)과 6장(동호 엄마)을 꼽는 독자가 가장 많습니다. 하나만 고르고, 왜인지 한 문장.",esc:"2장이요. 죽은 아이가 말하는데, 그게 설명이 아니라 그냥 말이라서요."},
+        {q:"「왜 제목이 과거형이 아니에요?」",a:"죽은 소년이 끝난 과거가 아니라 지금으로 「온다」는 뜻으로 읽는 게 일반적입니다. 에필로그에서 작가가 동호를 찾아가는 장면과 이어집니다.",esc:"저도 그게 제일 오래 남았어요. 끝난 일이 아니라고 제목부터 말하는 것 같아서요."},
+        {q:"「동호는 어떻게 돼요?」",locked:1,a:"5월 27일 새벽, 도청에 끝까지 남았다가 계엄군의 총에 목숨을 잃습니다. 책은 이걸 숨기지 않고 처음부터 그쪽으로 걸어갑니다.",esc:"알면서 읽는 게 더 힘든 책이더라고요. 어떻게 되는지보다 어떻게 거기 남았는지가 남았어요."}],
+      danger:"「읽고 어땠어요?」",hold:[0,0,0,0],holdText:"측정 불가",
+      fine:"* 이 책은 버티는 시간을 재지 않습니다. 못 읽었으면 못 읽었다고 하세요.",
+      store:"https://www.yes24.com/Product/Goods/13137546"
+    }
+    ,odyssey:{
+      type:"movie",title:"오디세이",author:"크리스토퍼 놀란 · 2026",cover:{c:"#1F2A44",ci:"#F0D9A6",sub:"집으로 가는 길이<br>제일 멀다."},shelf:"건들무비",
+      tagline:"오디세우스는 집으로, 내 대화는 산으로.",meta:"8월 5일 국내 개봉 · 전편 IMAX 필름 · 좌석은 소파도 됩니다",
+      people:[
+        {n:"오디세우스",r:"맷 데이먼",d:"트로이 전쟁을 끝낸 이타카의 왕. 10년째 집에 못 가고 있습니다.",lead:1},
+        {n:"페넬로페",r:"앤 해서웨이",d:"기다리는 아내. 구혼자들에게 둘러싸인 채 왕국을 버팁니다."},
+        {n:"텔레마코스",r:"톰 홀랜드",d:"아버지 얼굴도 모르는 아들. 영화의 또 다른 축입니다."},
+        {n:"안티노오스",r:"로버트 패틴슨",d:"구혼자들의 우두머리. 이타카 쪽 긴장은 이 사람이 만듭니다."},
+        {n:"아테나",r:"젠데이아",d:"오디세우스 곁의 여신. 영화는 신을 요란하게 보여주지 않습니다."},
+        {n:"칼립소",r:"샤를리즈 테론",d:"오디세우스를 섬에 붙잡아 두는 님프."},
+        {n:"음유시인",r:"트래비스 스콧",d:"영화를 여는 화자. 엔딩곡도 부릅니다."}],
+      summary:"트로이에서 이긴 오디세우스가 집으로 돌아가는 길과, 그가 없는 이타카에서 아내와 아들이 구혼자들을 버티는 시간이 번갈아 펼쳐집니다. 호메로스 원작의 두 축을 놀란이 교차 편집으로 묶은 영화입니다. 전편을 IMAX 필름 카메라로 찍은 첫 상업영화라, 「어디서 봤느냐」가 내용만큼 중요한 대화 소재가 됩니다.",
+      joke:"오디세우스는 집으로,<br>내 대화는 산으로.",
+      whonote:"영화는 책과 달리 「어디서·어떤 포맷으로 봤는지」까지 물어봅니다. 아래 관람 멘트는 창작 예시이고, 상영 정보는 예매 앱에서 확인하세요.",
+      points:[
+        {t:"두 이야기가 번갈아 갑니다",p:"바다 위의 오디세우스, 이타카의 텔레마코스와 페넬로페. 한 영화 안에 두 영화가 교차합니다.",deep:"<b>관점.</b> 원작도 텔레마코스 이야기로 시작하지만, 영화는 두 축을 끝까지 나란히 끌고 갑니다. 「바다 쪽이 좋았냐, 이타카 쪽이 좋았냐」가 이 영화의 자연스러운 첫 질문입니다. 하나를 고르세요."},
+        {t:"신을 요란하게 안 보여줍니다",p:"폭풍·파도·날씨 같은 자연 현상으로 신의 개입을 보여주는 쪽에 가깝습니다. 놀란다운 선택입니다.",deep:"<b>써먹기.</b> 「신화 영화인데 신이 안 나와서 좋았다」는 말은 반은 맞고 반은 위험합니다. 「신을 현상으로 보여준다」까지만 말하면 안전합니다. 아테나는 오디세우스 쪽에만 붙어 있습니다."},
+        {t:"IMAX 필름이 내용의 일부입니다",p:"전편을 IMAX 70mm 필름 카메라로 찍었습니다. 그래서 질문이 「어땠어?」가 아니라 「어디서 봤어?」로 옵니다.",deep:"<b>관람 레이어.</b> 용아맥(용산 CGV IMAX)은 예매 전쟁이었습니다. 「용아맥 못 잡아서 일반 IMAX로 봤다」가 가장 안전한 답입니다. 이 멘트는 창작 예시이며, 실제 상영관·포맷은 극장 앱에서 확인하세요."}],
+      lines:{
+        date:{line:"저는 바다 쪽보다 이타카 쪽, 페넬로페랑 텔레마코스 파트가 더 남더라고요. 어느 쪽이셨어요?",next:"질문으로 끝내면 상대가 말합니다. <b>그때 들으세요.</b>"},
+        work:{line:"3시간 가까운데 안 길었어요. 두 이야기가 번갈아 가서 그런가 봐요.",next:"이어서: <b>「부장님은 어디서 보셨어요?」</b> 관람 질문은 먼저 던지는 쪽이 안전합니다."},
+        club:{line:"신을 폭풍이랑 날씨로 보여주는 게 놀란답더라고요. 요란하지 않아서 더 컸어요.",next:"질문 하나 던지고 <b>듣기 모드</b>로 전환."},
+        reply:{line:"오디세이 봄. 집에 가는 얘기를 세 시간 보고 집에 가기 싫어짐.",next:"짧게. <b>포맷 얘기는 하지 마세요. 거기서 들킵니다.</b>"}},
+      votes:[187,33],
+      questions:[
+        {q:"「용아맥으로 보셨어요?」",a:"영화 쪽 최대 함정. 「네」라고 하면 좌석·예매 시간·소리 질문이 줄줄이 옵니다. 못 잡았다고 하는 쪽이 안전합니다.",esc:"용아맥은 예매를 못 잡아서 일반 IMAX로 봤어요. 그래도 폭풍 장면은 몸으로 오더라고요."},
+        {q:"「트래비스 스콧 나오는 건 어땠어요?」",a:"음유시인 역으로 영화를 여는 화자이고, 엔딩곡도 불렀습니다. 「뜬금없다」와 「액자 장치로 좋았다」로 갈립니다. 한쪽을 고르세요.",esc:"처음엔 왜 나오지 싶었는데, 이야기를 노래로 전하는 사람이 여는 게 원작이랑 맞긴 하더라고요."},
+        {q:"「구혼자들 결말은 원작대로예요?」",locked:1,a:"네. 오디세우스가 집에 돌아와 구혼자들을 처단합니다. 영화가 그 장면을 순화하지 않았다는 평이 많습니다.",esc:"그 장면은 원작 그대로라, 알고 봐도 세더라고요."}],
+      danger:"「용아맥으로 보셨어요?」",hold:[3,5,7,9],
+      fine:"* 좌석 「소파」는 농담입니다. 극장에서 보면 무제한.",
+      store:"https://www.universalpictures.com/movies/the-odyssey"
+    }
+  };
+  var TODAY="mosun";
+  var SHELF=["mosun","demian","boy"];
+  var SOON=["가호","싯다르타","프로젝트 헤일메리"];
+  var MOVIES=["odyssey"]; var MSOON=["F1","웨폰즈","28년<br>후"];
+
+  var state={preset:"date",book:TODAY,t0:null,timer:null,flipped:{},vote:null,votes:{}};
+  try{var s=localStorage.getItem("gundle-preset");if(s&&PRESETS[s])state.preset=s}catch(e){}
+  function B(){return BOOKS[state.book]}
+
+  /* home */
+  function coverHTML(b,mini){
+    return '<div class="cover" style="--c:'+b.cover.c+';--ci:'+b.cover.ci+'"><div><div class="t">'+b.title+'</div>'+(mini?'':'<div class="a">'+b.author+'</div>')+'</div>'+(mini?'':'<div class="a">'+b.cover.sub+'</div>')+'<div class="e"></div><div class="e2"></div></div>';
+  }
+  function renderHome(){
+    var b=BOOKS[TODAY];
+    $("#today").innerHTML=coverHTML(b)+'<div><div class="k">오늘의 한 권</div><h2>'+b.title+'<small>'+b.author+'</small></h2><p>'+b.tagline+'</p><button class="cta" data-start="'+TODAY+'"><span class="ttl">《'+b.title+'》</span> 3분 정복 <span>안 읽어도 됩니다</span></button><div class="meta">'+b.meta+'</div></div>';
+    var h="";
+    SHELF.forEach(function(id){var k=BOOKS[id];h+='<button class="mini" data-start="'+id+'">'+coverHTML(k,1)+'<div class="n">《'+k.title+'》<small>'+k.author+'</small></div><span class="tag">'+(k.tag||k.shelf)+'</span></button>'});
+    SOON.forEach(function(t){h+='<div class="mini soon"><div class="cover"><div><div class="t">'+t.replace('<br>',' ')+'</div></div></div><div class="n">'+t.replace('<br>',' ')+'<small>준비 중</small></div></div>'});
+    $("#shelf").innerHTML=h;
+    h="";MOVIES.forEach(function(id){var k=BOOKS[id];h+='<button class="mini" data-start="'+id+'">'+coverHTML(k,1)+'<div class="n">'+k.title+' · 놀란</div></button>'});
+    MSOON.forEach(function(t){h+='<div class="mini soon"><div class="cover"><div><div class="t">'+t+'</div></div></div><div class="n">준비 중</div></div>'});
+    $("#shelf2").innerHTML=h;
+    var c="";Object.keys(PRESETS).forEach(function(k){c+='<button class="chip'+(k===state.preset?" on":"")+'" data-p="'+k+'" role="radio" aria-checked="'+(k===state.preset)+'">'+PRESETS[k].name+'</button>'});
+    $("#presets").innerHTML=c;$("#presetlabel").textContent=PRESETS[state.preset].label;
+  }
+
+  /* book screens */
+  function renderBook(){
+    var b=B();
+    $$(".bt").forEach(function(e){e.textContent=(b.type==="movie"?"건들무비 · ":"")+"《"+b.title+"》"});
+    $("#who h2").innerHTML=b.type==="movie"?"누가 누구인지만<br>챙기면 됩니다.":"누가 누구인지만<br>챙기면 됩니다.";
+    $("#test h2").innerHTML=b.type==="movie"?"진짜 본 사람이<br>나타났습니다.":"진짜 읽은 사람이<br>나타났습니다.";
+    $("#people").innerHTML=b.people.map(function(p){return '<div class="person"><div class="av'+(p.lead?' lead':'')+'">'+p.n.charAt(0)+'</div><div><b>'+p.n+(p.r?' <small>'+p.r+'</small>':'')+'</b><span>'+p.d+'</span></div></div>'}).join("");
+    $("#summary").textContent=b.summary;$("#joke").innerHTML=b.joke;$("#whonote").textContent=b.whonote;
+    $("#points").innerHTML=b.points.map(function(p,i){return '<div class="point"><h3><em>0'+(i+1)+'</em>'+p.t+'</h3><p>'+p.p+'</p><button class="more" aria-expanded="false">더 깊이</button><div class="deep" hidden>'+p.deep+'</div></div>'}).join("");
+    $("#flips").innerHTML=b.questions.map(function(q,i){return '<button class="flip'+(q.locked?' locked':'')+'" data-q="'+i+'"><div class="inner"><div class="face f"><div class="k">꼬리질문 '+(i+1)+(q.locked?' · 결말 포함':'')+'</div><div class="qq">'+q.q+'</div><div class="tap"><span>'+(q.locked?'결말이 들어 있습니다. 열까요?':'뒤집어서 답 보기')+'</span><span>'+(q.locked?'🔒':'↻')+'</span></div></div><div class="face b"><div><div class="k">'+(q.locked?'답 (결말)':'답의 방향')+'</div><div class="aa">'+q.a+'</div></div><div class="esc"><small>탈출 멘트</small>'+q.esc+'</div></div></div></button>'}).join("");
+    renderLine();renderVotes();updProb();
+  }
+  function renderLine(){
+    var b=B(),p=PRESETS[state.preset],l=b.lines[state.preset];
+    $("#presets2").innerHTML=Object.keys(PRESETS).map(function(k){return '<button class="chip'+(k===state.preset?" on":"")+'" data-p="'+k+'">'+PRESETS[k].name+'</button>'}).join("");
+    $("#lk").textContent=b.type==="movie"?p.k.replace("책","영화"):p.k;$("#ll").textContent=l.line;$("#ln").innerHTML=l.next;
+  }
+  document.addEventListener("click",function(e){
+    var c=e.target.closest(".chip[data-p]");if(!c)return;
+    state.preset=c.dataset.p;try{localStorage.setItem("gundle-preset",state.preset)}catch(x){}
+    $$(".chip[data-p]").forEach(function(x){var on=x.dataset.p===state.preset;x.classList.toggle("on",on);x.setAttribute("aria-checked",on)});
+    $("#presetlabel").textContent=PRESETS[state.preset].label;renderLine();
+  });
+
+  /* navigation */
+  var ORDER=["home","who","three","line","test","receipt"];
+  function show(id){
+    if(ORDER.indexOf(id)<0)id="home";
+    $$(".screen").forEach(function(s){s.classList.toggle("on",s.id===id)});
+    window.scrollTo(0,0);
+    if(id==="who"&&!state.t0)startTimer();
+    if(id==="home"){stopTimer();state.t0=null;}
+    if(id==="receipt")fillReceipt();
+    if(location.hash!=="#"+id)history.replaceState(null,"","#"+id);
+  }
+  document.addEventListener("click",function(e){
+    var st=e.target.closest("[data-start]");
+    if(st){state.book=st.dataset.start;state.t0=null;state.flipped={};state.vote=null;renderBook();show("who");return}
+    var b=e.target.closest("[data-go]");if(b)show(b.dataset.go);
+    var m=e.target.closest(".more");if(m){var open=m.getAttribute("aria-expanded")==="true";m.setAttribute("aria-expanded",!open);m.nextElementSibling.hidden=open;m.firstChild.textContent=open?"더 깊이":"접기"}
+    var f=e.target.closest(".flip");if(f){if(f.classList.contains("locked")&&!f.classList.contains("open"))f.classList.remove("locked");f.classList.toggle("open");if(f.classList.contains("open"))state.flipped[f.dataset.q]=1;updProb()}
+  });
+  window.addEventListener("hashchange",function(){show(location.hash.slice(1)||"home")});
+
+  /* timer */
+  function fmt(ms){var s=Math.floor(ms/1000);return Math.floor(s/60)+":"+("0"+s%60).slice(-2)}
+  function tick(){var el=fmt(Date.now()-state.t0);$$(".tm").forEach(function(t){t.textContent=el})}
+  function startTimer(){state.t0=Date.now();tick();state.timer=setInterval(tick,1000)}
+  function stopTimer(){clearInterval(state.timer)}
+
+  /* copy */
+  function toast(msg){var t=$("#toast");t.textContent=msg;t.classList.add("show");setTimeout(function(){t.classList.remove("show")},1600)}
+  function copy(text,ok){
+    var done=function(){toast(ok||"복사했습니다")};
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(done,function(){fallback(text);done()})}else{fallback(text);done()}
+  }
+  function fallback(text){var ta=document.createElement("textarea");ta.value=text;document.body.appendChild(ta);ta.select();try{document.execCommand("copy")}catch(e){}document.body.removeChild(ta)}
+  $("#copyline").addEventListener("click",function(){copy(B().lines[state.preset].line,"한마디 복사. 두 번 쓰면 들킵니다")});
+
+  /* votes */
+  function V(){if(!state.votes[state.book])state.votes[state.book]={a:B().votes[0],b:B().votes[1]};return state.votes[state.book]}
+  function renderVotes(){var v=V();$("#v1 .n").textContent=v.a;$("#v2 .n").textContent=v.b;$("#v1").classList.toggle("on",state.vote==="a");$("#v2").classList.toggle("on2",state.vote==="b")}
+  $("#v1").addEventListener("click",function(){var v=V();if(state.vote==="a")return;if(state.vote==="b")v.b--;v.a++;state.vote="a";renderVotes();toast("통했다 +1")});
+  $("#v2").addEventListener("click",function(){var v=V();if(state.vote==="b")return;if(state.vote==="a")v.a--;v.b++;state.vote="b";renderVotes();toast("걸렸다 +1. 편집부가 한마디를 고칩니다")});
+
+  /* poll */
+  var POLL={yes:0,no:0};try{var pv=JSON.parse(localStorage.getItem("gundle-poll")||"null");if(pv)POLL=pv}catch(e){}
+  document.addEventListener("click",function(e){
+    var o=e.target.closest("[data-poll]");if(!o)return;
+    POLL[o.dataset.poll]++;try{localStorage.setItem("gundle-poll",JSON.stringify(POLL))}catch(x){}
+    $$("[data-poll]").forEach(function(b){b.classList.toggle("on",b===o);b.disabled=true});
+    $("#polln").textContent="고맙습니다. 한 달 뒤에 결과로 답하겠습니다. (지금은 이 기기에만 저장)";
+  });
+
+  /* flips */
+  function updProb(){
+    var n=Object.keys(state.flipped).length,p=[12,41,73,96][n];
+    $("#prob").textContent=p+"%";$("#probbar").style.width=p+"%";
+    $("#testnote").textContent=n===3?"다 뒤집으셨습니다. 영수증 받으세요.":n===0?"세 장 다 뒤집으면 영수증이 나옵니다.":(3-n)+"장 남았습니다.";
+  }
+
+  /* receipt */
+  var no=1;try{no=parseInt(localStorage.getItem("gundle-no")||"0",10)+1}catch(e){}
+  function fillReceipt(){
+    stopTimer();var b=B();
+    var ms=state.t0?Date.now()-state.t0:0,s=Math.floor(ms/1000);
+    var mv=b.type==="movie",n=Object.keys(state.flipped).length;
+    $("#rhead").textContent=mv?"건들무비 티켓":"건들북 영수증";
+    $("#rtitle").textContent="《"+b.title+"》";$("#rauthor").textContent=b.author;
+    var rows=[];
+    function R(k,v){rows.push([k,v])}
+    if(mv){R("상영관","거실");R("좌석","소파 B2");R("포맷","유튜브 요약 (세로)");R("관람 시간","0분")}else{R("읽은 시간","0분")}
+    R("건드린 시간",Math.floor(s/60)+"분 "+(s%60)+"초");
+    R(mv?"챙긴 배역":"챙긴 인물",b.people.length+"명");
+    R("챙긴 한마디","1개 · "+PRESETS[state.preset].name+"용");
+    R("뒤집은 꼬리질문",n+" / 3");
+    R("예상 버티는 시간",b.holdText||("약 "+b.hold[n]+"분"));
+    $("#rrows").innerHTML=rows.map(function(r){return '<div class="r"><span>'+r[0]+'</span><span class="d"></span><span>'+r[1]+'</span></div>'}).join("")+'<div class="r danger"><span>위험 질문</span><q id="rdanger"></q></div>';
+    $("#rdanger").textContent=b.danger;
+    $("#rfine").textContent=b.fine||"* 예상 버티는 시간은 농담입니다. 진짜 읽으면 무제한.";
+    $("#rstore").href=b.store;$("#rstore").innerHTML=mv?'여기까지 왔으면 그냥 보세요 <small>공식 사이트 ↗</small>':'여기까지 왔으면 그냥 읽으세요 <small>서점 ↗</small>';$("#rrestart").textContent="《"+b.title+"》 처음부터 다시";
+    var d=new Date();var pad=function(x){return("0"+x).slice(-2)};
+    $("#rno").textContent="No. "+("000"+no).slice(-4)+" · "+d.getFullYear()+"."+pad(d.getMonth()+1)+"."+pad(d.getDate())+" "+pad(d.getHours())+":"+pad(d.getMinutes());
+    try{localStorage.setItem("gundle-no",String(no))}catch(e){}
+    state.t0=null;
+  }
+  $("#copyrc").addEventListener("click",function(){
+    var rows=$$("#rc .r:not(.danger)").map(function(r){var c=r.children;return c[0].textContent+" … "+c[c.length-1].textContent});
+    var txt=$("#rhead").textContent+" "+$("#rno").textContent+"\n"+$("#rtitle").textContent+" "+$("#rauthor").textContent+"\n"+rows.join("\n")+"\n위험 질문: "+$("#rdanger").textContent+"\n내용은 쓸 만하게, 태도는 가볍게. gundle.app";
+    copy(txt,"영수증 복사. 스레드에 붙여넣으세요");
+  });
+
+  renderHome();renderBook();
+  var h=location.hash.slice(1);
+  show(h&&h!=="home"&&ORDER.indexOf(h)>0?"home":"home");
+})();
+</script>
+
+</body>
+</html>
