@@ -198,6 +198,54 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--orange);outline-off
 .poll .pn{font-size:12.5px;color:var(--ink-2);margin-top:8px}
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:999px;font-size:14px;opacity:0;transition:.25s;pointer-events:none;z-index:20;white-space:nowrap}
 .toast.show{opacity:1;transform:translateX(-50%)}
+
+/* 빨간 펜 — 편집자가 미리 그어 둔 밑줄. 화면 진입 0.5초 뒤 한 줄만 그어진다. */
+.pen{background:linear-gradient(180deg,transparent 74%,rgba(226,60,46,.6) 75% 92%,transparent 93%) no-repeat 0 0/0% 100%;transition:background-size .75s cubic-bezier(.25,.9,.3,1);-webkit-box-decoration-break:clone;box-decoration-break:clone;color:inherit}
+.pen.on{background-size:100% 100%}
+@media (prefers-reduced-motion:reduce){.pen{transition:none}}
+/* 약관 글씨 — 보험 약관처럼 일부러 작게 */
+.receipt .terms{margin-top:10px;font-size:8.6px;line-height:1.4;color:#9a9a9a;text-align:justify;letter-spacing:-.01em;word-break:keep-all}
+.receipt .terms b{color:#8a8a8a;font-weight:700}
+.receipt .terms i{font-style:normal;display:block;margin-top:3px;color:#7a7a7a}
+.receipt.dim{filter:blur(2px) saturate(.6);opacity:.55}
+/* 약관 동의 모달 / 비상 주머니 시트 */
+.ov{position:fixed;inset:0;background:rgba(10,12,16,.55);z-index:30;display:none;align-items:flex-end;justify-content:center;padding:0;backdrop-filter:blur(2px)}
+.ov.on{display:flex}
+.sheet{width:100%;max-width:430px;background:var(--paper);color:var(--ink);border-radius:18px 18px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom,0px));animation:up .3s cubic-bezier(.2,.8,.2,1);max-height:92vh;display:flex;flex-direction:column}
+@keyframes up{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}
+.sheet .h3{font-weight:800;font-size:19px;letter-spacing:-.02em;margin:0 0 4px}
+.sheet .sub{font-size:13.5px;color:var(--ink-2);margin:0 0 12px}
+.tbox{border:1px solid var(--line);border-radius:10px;padding:12px 14px;max-height:38vh;overflow:auto;font-size:13px;line-height:1.6;color:var(--ink);background:var(--paper-2)}
+.tbox h4{margin:0 0 6px;font-size:13px;font-weight:800}
+.tbox p{margin:0 0 8px}
+.tbox .art{font-weight:700}
+.tbox .end{font-size:12px;color:var(--ink-2);margin:0}
+.sheet .btns{display:flex;gap:8px;margin-top:12px}
+.sheet .btns button{flex:1;border:1px solid var(--line);border-radius:12px;padding:13px 8px;font-size:14.5px;font-weight:700;min-height:48px;background:var(--paper)}
+.sheet .btns button.pri{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.sheet .btns button:disabled{opacity:.4}
+.sheet .hint{font-size:12px;color:var(--ink-2);text-align:center;margin-top:8px;min-height:1em}
+/* 봉인 — 라벨 없음 */
+.pocket{align-self:center;margin-top:22px;opacity:.38;width:44px;height:44px;display:grid;place-items:center;border-radius:50%}
+.pocket svg{width:22px;height:22px;display:block}
+.pocket:active{opacity:.7}
+.seal{font-family:var(--serif);font-weight:600;font-size:22px;line-height:1.4;margin:6px 0 10px}
+.ed{font-size:14px;line-height:1.6;color:var(--ink-2);border-left:2px solid var(--line);padding-left:10px;margin:0 0 4px}
+.ed b{color:var(--ink);font-weight:600}
+.dial{margin-top:14px}
+.dial .k{font-size:12.5px;color:var(--ink-2);margin-bottom:6px}
+.dial .chips{margin:0 0 4px}
+/* 쪽지 — 구겨진 종이 */
+.cheat{position:relative;background:#FBF6E6;color:#2a2418;padding:20px 18px 18px;transform:rotate(-1.2deg);box-shadow:0 10px 26px rgba(0,0,0,.22);font-family:var(--serif);font-weight:600;font-size:15px;line-height:1.65;overflow:auto;max-height:52vh;
+  background-image:linear-gradient(115deg,rgba(0,0,0,0) 46%,rgba(0,0,0,.045) 47%,rgba(0,0,0,0) 49%),linear-gradient(28deg,rgba(0,0,0,0) 58%,rgba(0,0,0,.04) 59%,rgba(0,0,0,0) 61%),linear-gradient(90deg,rgba(255,255,255,.35),rgba(0,0,0,.02) 50%,rgba(255,255,255,.3));clip-path:polygon(0 1%,3% 0,22% .8%,47% 0,70% 1%,100% 0,99.4% 30%,100% 55%,99.2% 100%,80% 99%,55% 100%,30% 99.2%,8% 100%,0 99%)}
+.cheat .ch{font-family:var(--sans);font-size:11px;color:#7a6f58;letter-spacing:.06em;display:flex;justify-content:space-between;margin-bottom:8px}
+.cheat ul{margin:0;padding:0;list-style:none}
+.cheat li{margin:0 0 9px;padding-left:16px;position:relative}
+.cheat li::before{content:"";position:absolute;left:0;top:.75em;width:8px;height:8px;border:1.5px solid #c33;border-radius:50%}
+.cheat li .u{background:linear-gradient(180deg,transparent 74%,rgba(226,60,46,.55) 75% 92%,transparent 93%);-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.cheat li small{display:block;font-family:var(--sans);font-weight:500;font-size:12px;color:#7a6f58;margin-top:2px}
+.cheat .sec{font-family:var(--sans);font-size:11px;font-weight:700;color:#a33;margin:12px 0 6px;letter-spacing:.04em}
+.cheat .stamp{display:inline-block;margin-top:10px;border:2px solid rgba(190,40,30,.7);color:rgba(190,40,30,.85);font-family:var(--sans);font-weight:800;font-size:11px;letter-spacing:.04em;padding:5px 8px;transform:rotate(-3deg);border-radius:3px}
 </style>
 
 </head>
@@ -299,6 +347,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--orange);outline-off
       <div class="bc"></div>
       <div class="tag"><b>내용은 쓸 만하게, 태도는 가볍게.</b>gundle.app</div>
       <div class="fine" id="rfine">* 예상 버티는 시간은 농담입니다. 진짜 읽으면 무제한.</div>
+      <div class="terms" id="rterms"></div>
     </div>
     <div class="racts"><button class="pri" id="copyrc">텍스트로 복사</button><button data-go="home">다른 책도 3분</button></div>
     <div class="rhint" id="rhint">스크린샷해서 스레드·스토리에 올리세요. 자백이 밈입니다.</div>
@@ -312,9 +361,23 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--orange);outline-off
       <a id="rstore" href="#" target="_blank" rel="noopener">여기까지 왔으면 그냥 읽으세요 <small>서점 ↗</small></a>
       <button data-go="who"><span id="rrestart"></span> <small>1 / 5</small></button>
     </div>
+    <button class="pocket" id="pocket" aria-label="봉인"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9c0-2.8 2.2-5 5-5s5 2.2 5 5c0 1.2-.4 2-1 2.8 1.9 1.3 3 3.3 3 5.7 0 1.4-1.1 2.5-2.5 2.5h-9A2.5 2.5 0 0 1 5 17.5c0-2.4 1.1-4.4 3-5.7C7.4 11 7 10.2 7 9z"/><path d="M8 11.8h8"/><circle cx="12" cy="16" r="1.4" fill="currentColor" stroke="none"/></svg></button>
   </div>
 </section>
 
+</div>
+
+<div class="ov" id="termsov" role="dialog" aria-modal="true" aria-labelledby="termsh">
+  <div class="sheet">
+    <div class="h3" id="termsh">건들북 이용약관에 동의하십니까?</div>
+    <p class="sub">영수증 발행 전 한 번만 여쭙니다.</p>
+    <div class="tbox" id="tbox"></div>
+    <div class="btns"><button id="agree-read" disabled>읽고 동의합니다</button><button class="pri" id="agree-skip" disabled>읽지 않고 동의합니다</button></div>
+    <div class="hint" id="thint">끝까지 내리시면 버튼이 켜집니다.</div>
+  </div>
+</div>
+<div class="ov" id="pocketov" role="dialog" aria-modal="true">
+  <div class="sheet" id="psheet"></div>
 </div>
 <div class="toast" id="toast">복사했습니다</div>
 
@@ -552,6 +615,14 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--orange);outline-off
   try{var s=localStorage.getItem("gundle-preset");if(s&&PRESETS[s])state.preset=s}catch(e){}
   function B(){return BOOKS[state.book]}
 
+  /* 빨간 펜 — 편집자가 그어 둔 밑줄. 화면당 한 줄. 사용자는 긋지 않는다. */
+  var PENS={"mosun": {"who": "남의 삶을 이해하는 일과 내 삶을 선택하는 일이 얼마나 다른지", "three": "같은 얼굴, 다른 삶.", "line": {"date": "엄마랑 이모, 쌍둥이 구도가 더 재밌더라고요", "work": "쌍둥이인데 삶이 완전 다르잖아요", "club": "이해하는 거랑 동의하는 게 같은지", "reply": "이해랑 동의는 다른 거더라"}, "test": "그걸 정하는 순간 책이 납작해지는 느낌"}, "demian": {"who": "남들이 정해준 답보다 자기 자신을 찾아가는 이야기", "three": "익숙하고 안전한 세계를 깨고 나오는 성장의 상징", "line": {"date": "흔들리는 쪽이 주인공이잖아요", "work": "착하게 사는 거랑 자기답게 사는 게 같지는 않더라고요", "club": "「선악을 넘는다」로 읽는지 「둘 다 품는다」로 읽는지", "reply": "지금은 싱클레어가 안쓰러움"}, "test": "아브락사스요"}, "boy": {"who": "그 뒤로 어떻게 살았는지를 장마다 다른 목소리로 따라갑니다", "three": "끝난 일이 아니라는 뜻으로 읽힙니다", "line": {"date": "가볍게 얘기가 안 되더라고요", "work": "한참 못 넘겼어요", "club": "「온다」가 현재형인 게 계속 걸리더라고요", "reply": "2장 넘기는 데 일주일 걸림"}, "test": "설명이 아니라 그냥 말이라서요"}, "gaho": {"who": "무엇을 받아들이고 무엇을 제거할지 스스로 정해야 합니다", "three": "받아들일 것과 제거할 것을 고르는 것", "line": {"date": "거기서 안 일어나는 게 가호예요", "work": "여자 주인공이 처음이라 그런지 결이 좀 달라요", "club": "받아들일 것과 제거할 것을 고르는 게 이 소설 전부", "reply": "하루키 맞음"}, "test": "꿈 아니라고 딱 잘라 말해 주는 어른이잖아요"}, "siddhartha": {"who": "가르침이 아니라 자기 삶 전체로 깨닫는 이야기", "three": "존경하고, 그래도 제자가 되지 않습니다", "line": {"date": "부처를 만나고도 안 따라가는 장면", "work": "둘 다 겪고 나서야 강에 앉더라고요", "club": "지혜는 전할 수 없다는 책을 모여서 읽는 게 좀 모순이지 않나", "reply": "부처 나오는데 주인공이 안 따라감"}, "test": "그냥 거기서 한참 안 넘겼어요"}, "hailmary": {"who": "둘이 말부터 배워 가며 함께 답을 찾습니다", "three": "이 책이 울리는 지점은 과학이 아니라 우정입니다", "line": {"date": "로키가 처음 말 배우는 장면에서 울컥했어요", "work": "SF인데 결국 우정 얘기더라고요", "club": "원래 영웅이 아니었다는 게 밝혀지는 순간", "reply": "과학책인데 울음"}, "test": "책에서 제일 사람 같은 캐릭터예요"}};
+  function penOf(k){var p=PENS[state.book];if(!p)return null;if(k==="line")return p.line&&p.line[state.preset];return p[k]}
+  function esc(t){return t.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
+  function pen(text,k,raw){var ph=penOf(k),h=raw?text:esc(text);if(!ph)return h;var e=raw?ph:esc(ph);var i=h.indexOf(e);if(i<0)return h;return h.slice(0,i)+'<mark class="pen">'+e+'</mark>'+h.slice(i+e.length)}
+  function drawPens(scope){var ps=$$(".pen",scope);if(!ps.length)return;ps.forEach(function(p){p.classList.remove("on")});void scope.offsetWidth;setTimeout(function(){ps.forEach(function(p){p.classList.add("on")})},500)}
+  function penCount(){var p=PENS[state.book];return p?4:0}
+
   /* home */
   function coverHTML(b,mini){
     return '<div class="cover" style="--c:'+b.cover.c+';--ci:'+b.cover.ci+'"><div><div class="t">'+b.title+'</div>'+(mini?'':'<div class="a">'+b.author+'</div>')+'</div>'+(mini?'':'<div class="a">'+b.cover.sub+'</div>')+'<div class="e"></div><div class="e2"></div></div>';
@@ -577,15 +648,15 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--orange);outline-off
     $("#who h2").innerHTML=b.type==="movie"?"누가 누구인지만<br>챙기면 됩니다.":"누가 누구인지만<br>챙기면 됩니다.";
     $("#test h2").innerHTML=b.type==="movie"?"진짜 본 사람이<br>나타났습니다.":"진짜 읽은 사람이<br>나타났습니다.";
     $("#people").innerHTML=b.people.map(function(p){return '<div class="person"><div class="av'+(p.lead?' lead':'')+'">'+p.n.charAt(0)+'</div><div><b>'+p.n+(p.r?' <small>'+p.r+'</small>':'')+'</b><span>'+p.d+'</span></div></div>'}).join("");
-    $("#summary").textContent=b.summary;$("#joke").innerHTML=b.joke;$("#whonote").textContent=b.whonote;
-    $("#points").innerHTML=b.points.map(function(p,i){return '<div class="point"><h3><em>0'+(i+1)+'</em>'+p.t+'</h3><p>'+p.p+'</p><button class="more" aria-expanded="false">더 깊이</button><div class="deep" hidden>'+p.deep+'</div></div>'}).join("");
-    $("#flips").innerHTML=b.questions.map(function(q,i){return '<button class="flip'+(q.locked?' locked':'')+'" data-q="'+i+'"><div class="inner"><div class="face f"><div class="k">꼬리질문 '+(i+1)+(q.locked?' · 결말 포함':'')+'</div><div class="qq">'+q.q+'</div><div class="tap"><span>'+(q.locked?'결말이 들어 있습니다. 열까요?':'뒤집어서 답 보기')+'</span><span>'+(q.locked?'🔒':'↻')+'</span></div></div><div class="face b"><div><div class="k">'+(q.locked?'답 (결말)':'답의 방향')+'</div><div class="aa">'+q.a+'</div></div><div class="esc"><small>탈출 멘트</small>'+q.esc+'</div></div></div></button>'}).join("");
+    $("#summary").innerHTML=pen(b.summary,"who");$("#joke").innerHTML=b.joke;$("#whonote").textContent=b.whonote;
+    $("#points").innerHTML=b.points.map(function(p,i){return '<div class="point"><h3><em>0'+(i+1)+'</em>'+p.t+'</h3><p>'+pen(p.p,"three",1)+'</p><button class="more" aria-expanded="false">더 깊이</button><div class="deep" hidden>'+p.deep+'</div></div>'}).join("");
+    $("#flips").innerHTML=b.questions.map(function(q,i){return '<button class="flip'+(q.locked?' locked':'')+'" data-q="'+i+'"><div class="inner"><div class="face f"><div class="k">꼬리질문 '+(i+1)+(q.locked?' · 결말 포함':'')+'</div><div class="qq">'+q.q+'</div><div class="tap"><span>'+(q.locked?'결말이 들어 있습니다. 열까요?':'뒤집어서 답 보기')+'</span><span>'+(q.locked?'🔒':'↻')+'</span></div></div><div class="face b"><div><div class="k">'+(q.locked?'답 (결말)':'답의 방향')+'</div><div class="aa">'+q.a+'</div></div><div class="esc"><small>탈출 멘트</small>'+pen(q.esc,"test",1)+'</div></div></div></button>'}).join("");
     renderLine();renderVotes();updProb();
   }
   function renderLine(){
     var b=B(),p=PRESETS[state.preset],l=b.lines[state.preset];
     $("#presets2").innerHTML=Object.keys(PRESETS).map(function(k){return '<button class="chip'+(k===state.preset?" on":"")+'" data-p="'+k+'">'+PRESETS[k].name+'</button>'}).join("");
-    $("#lk").textContent=b.type==="movie"?p.k.replace("책","영화"):p.k;$("#ll").textContent=l.line;$("#ln").innerHTML=l.next;
+    $("#lk").textContent=b.type==="movie"?p.k.replace("책","영화"):p.k;$("#ll").innerHTML=pen(l.line,"line");drawPens($("#line"));$("#ln").innerHTML=l.next;
   }
   document.addEventListener("click",function(e){
     var c=e.target.closest(".chip[data-p]");if(!c)return;
@@ -604,13 +675,15 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--orange);outline-off
     if(id==="home"){stopTimer();state.t0=null;}
     if(id==="receipt")fillReceipt();
     if(location.hash!=="#"+id)history.replaceState(null,"","#"+id);
+    drawPens($("#"+id));
+    if(id==="receipt"&&!TERMS)openTerms();
   }
   document.addEventListener("click",function(e){
     var st=e.target.closest("[data-start]");
     if(st){state.book=st.dataset.start;state.t0=null;state.flipped={};state.vote=null;renderBook();show("who");return}
     var b=e.target.closest("[data-go]");if(b)show(b.dataset.go);
     var m=e.target.closest(".more");if(m){var open=m.getAttribute("aria-expanded")==="true";m.setAttribute("aria-expanded",!open);m.nextElementSibling.hidden=open;m.firstChild.textContent=open?"더 깊이":"접기"}
-    var f=e.target.closest(".flip");if(f){if(f.classList.contains("locked")&&!f.classList.contains("open"))f.classList.remove("locked");f.classList.toggle("open");if(f.classList.contains("open"))state.flipped[f.dataset.q]=1;updProb()}
+    var f=e.target.closest(".flip");if(f){if(f.classList.contains("locked")&&!f.classList.contains("open"))f.classList.remove("locked");f.classList.toggle("open");if(f.classList.contains("open")){state.flipped[f.dataset.q]=1;drawPens(f)}updProb()}
   });
   window.addEventListener("hashchange",function(){show(location.hash.slice(1)||"home")});
 
@@ -665,6 +738,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--orange);outline-off
     R("건드린 시간",Math.floor(s/60)+"분 "+(s%60)+"초");
     R(mv?"챙긴 배역":"챙긴 인물",b.people.length+"명");
     R("챙긴 한마디","1개 · "+PRESETS[state.preset].name+"용");
+    if(penCount())R("밑줄",penCount()+"줄");
     R("뒤집은 꼬리질문",n+" / 3");
     R("예상 버티는 시간",b.holdText||("약 "+b.hold[n]+"분"));
     $("#rrows").innerHTML=rows.map(function(r){return '<div class="r"><span>'+r[0]+'</span><span class="d"></span><span>'+r[1]+'</span></div>'}).join("")+'<div class="r danger"><span>위험 질문</span><q id="rdanger"></q></div>';
@@ -675,12 +749,110 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--orange);outline-off
     $("#rno").textContent="No. "+("000"+no).slice(-4)+" · "+d.getFullYear()+"."+pad(d.getMonth()+1)+"."+pad(d.getDate())+" "+pad(d.getHours())+":"+pad(d.getMinutes());
     try{localStorage.setItem("gundle-no",String(no))}catch(e){}
     state.t0=null;
+    renderTerms();
   }
   $("#copyrc").addEventListener("click",function(){
     var rows=$$("#rc .r:not(.danger)").map(function(r){var c=r.children;return c[0].textContent+" … "+c[c.length-1].textContent});
     var txt=$("#rhead").textContent+" "+$("#rno").textContent+"\n"+$("#rtitle").textContent+" "+$("#rauthor").textContent+"\n"+rows.join("\n")+"\n위험 질문: "+$("#rdanger").textContent+"\n내용은 쓸 만하게, 태도는 가볍게. gundle.app";
     copy(txt,"영수증 복사. 스레드에 붙여넣으세요");
   });
+
+
+  /* 약관 — 3원칙. 보험 약관처럼 작게. 어디에도 "확대해 보세요"라고 쓰지 않는다. */
+  var TERMS=null;try{TERMS=JSON.parse(localStorage.getItem("gundle-terms")||"null")}catch(e){}
+  var ARTS=[
+    ["제1조(원칙)","건들북은 책을 읽지 않는다. 읽으면 이해가 어려워지기 때문이다."],
+    ["제2조(결말)","건들북은 결말을 알려주지 않는다. 제1조에 따라 우리도 모른다."],
+    ["제3조(시간)","건들북은 3분을 넘기지 않는다. 3분 이상은 우리도 힘들다."]];
+  var ADD=["① 틀린 내용이 있어도 바로잡지 않는다. 어차피 우리도 안 읽어서 모른다(제1조 참조).","② 본 영수증은 독서의 증빙으로 사용될 수 없다.","③ 본 약관은 법적 효력이 없으며, 건들북은 개인정보를 수집하지 않는다(제1조 참조)."];
+  function dstr(d){var p=function(x){return("0"+x).slice(-2)};return d.getFullYear()+"."+p(d.getMonth()+1)+"."+p(d.getDate())}
+  function renderTerms(){
+    var h="<b>건들북 이용약관</b> ";
+    ARTS.forEach(function(a){h+="<b>"+a[0]+"</b> "+a[1]+" "});
+    h+="<b>부칙</b> "+ADD.join(" ");
+    if(TERMS)h+="<i>귀하는 "+TERMS.date+" "+(TERMS.how==="read"?"읽고":"읽지 않고")+" 동의하셨습니다.</i>";
+    $("#rterms").innerHTML=h;
+  }
+  function openTerms(){
+    var h="<h4>건들북 이용약관</h4>";
+    ARTS.forEach(function(a){h+='<p><span class="art">'+a[0]+'</span> '+a[1]+'</p>'});
+    h+='<p><span class="art">부칙</span><br>'+ADD.join("<br>")+'</p><p class="end">— 끝 —</p>';
+    $("#tbox").innerHTML=h;$("#rc").classList.add("dim");$("#termsov").classList.add("on");
+    var box=$("#tbox"),done=false;
+    function chk(){if(done)return;if(box.scrollHeight-box.scrollTop-box.clientHeight<6){done=true;$("#agree-read").disabled=false;$("#agree-skip").disabled=false;$("#thint").textContent=""}}
+    box.scrollTop=0;box.addEventListener("scroll",chk);setTimeout(chk,60);
+    setTimeout(function(){if(!done){$("#agree-skip").disabled=false;$("#thint").textContent="안 읽으셔도 동의는 됩니다. 저희도 그렇게 합니다."}},1200);
+  }
+  function agree(how){
+    TERMS={how:how,date:dstr(new Date())};try{localStorage.setItem("gundle-terms",JSON.stringify(TERMS))}catch(e){}
+    $("#termsov").classList.remove("on");$("#rc").classList.remove("dim");renderTerms();
+    toast(how==="read"?"읽고 동의하셨습니다. 드문 분입니다":"읽지 않고 동의하셨습니다. 환영합니다");
+  }
+  $("#agree-read").addEventListener("click",function(){agree("read")});
+  $("#agree-skip").addEventListener("click",function(){agree("skip")});
+
+  /* 비상 주머니 — 봉인 아이콘 하나. 라벨 없음. 정말 급할 때만. */
+  var PST={preset:null,len:"3"};
+  function strip(h){var d=document.createElement("div");d.innerHTML=h;return d.textContent}
+  function pocketStage(n){
+    var sh=$("#psheet"),b=B(),h="";
+    PST.preset=PST.preset||state.preset;
+    if(n===1){
+      h='<div class="sub">봉인된 주머니</div><div class="seal">정말 급할 때만 펴보세요.<br>지금이 그때인 건 압니다.</div>'
+       +'<p class="ed"><b>편집자 드림.</b> 편집자로서 돌아오지 못할 선입니다. 추천드리지 않습니다만 — 저도 이거 들고 갔었습니다.</p>'
+       +'<div class="btns"><button data-ps="close">안 열게요</button><button class="pri" data-ps="2">급합니다</button></div>';
+    }else if(n===2){
+      var chips=function(o,cur,attr){return Object.keys(o).map(function(k){return '<button class="chip'+(k===cur?" on":"")+'" data-'+attr+'="'+k+'">'+o[k]+'</button>'}).join("")};
+      var LEN={"3":"3분","30":"30분","all":"완독한 척"};
+      var P={};Object.keys(PRESETS).forEach(function(k){P[k]=PRESETS[k].name});
+      h='<div class="h3">《'+b.title+'》 암기 쪽지</div><p class="sub">두 가지만 정하시면 됩니다.</p>'
+       +'<div class="dial"><div class="k">어디 가십니까</div><div class="chips">'+chips(P,PST.preset,"pp")+'</div></div>'
+       +'<div class="dial"><div class="k">몇 분 읽은 티 내고 싶으세요</div><div class="chips">'+chips(LEN,PST.len,"pl")+'</div></div>'
+       +'<div class="btns"><button data-ps="1">‹ 이전</button><button class="pri" data-ps="3">쪽지 뽑기</button></div>';
+    }else{
+      var pn=PENS[state.book]||{},L=b.lines[PST.preset],LEN2={"3":"3분","30":"30분","all":"완독한 척"};
+      var items=[];
+      function it(t,sub,u){items.push('<li>'+(u?'<span class="u">'+esc(t)+'</span>':esc(t))+(sub?'<small>'+esc(sub)+'</small>':'')+'</li>')}
+      if(pn.who)it(pn.who,"누가 누구",1);
+      if(pn.three)it(pn.three,"포인트",1);
+      if(pn.line&&pn.line[PST.preset])it(pn.line[PST.preset],PRESETS[PST.preset].name+"용 한마디",1);
+      if(pn.test)it(pn.test,"걸렸을 때",1);
+      var core=items.join("");items=[];
+      var more="",deep="";
+      if(PST.len!=="3"){
+        b.points.forEach(function(p,i){it(p.t+" — "+p.p,"포인트 0"+(i+1))});
+        it(L.line,"한마디 전문 · "+strip(L.next));
+        b.questions.forEach(function(q,i){if(!q.locked)it(q.esc,"꼬리질문 "+(i+1)+" 탈출 멘트: "+q.q)});
+        it(b.danger,"위험 질문 — 받으면 되묻기");
+        more=items.join("");items=[];
+      }
+      if(PST.len==="all"){
+        b.points.forEach(function(p,i){it(strip(p.deep),"더 깊이 0"+(i+1))});
+        b.questions.forEach(function(q,i){if(q.locked)it(q.a,"결말 — 완독한 척이면 알아야 합니다")});
+        deep=items.join("");
+      }
+      h='<div class="cheat" id="cheat"><div class="ch"><span>《'+b.title+'》 암기용</span><span>'+LEN2[PST.len]+' 읽은 티</span></div>'
+       +'<ul>'+core+'</ul>'+(more?'<div class="sec">30분용 추가</div><ul>'+more+'</ul>':'')+(deep?'<div class="sec">완독한 척 추가</div><ul>'+deep+'</ul>':'')
+       +'<div class="stamp">시험 종료 2분 전 암기용 · 어차피 다들 이거 들고 있습니다</div></div>'
+       +'<div class="btns"><button data-ps="2">‹ 다시</button><button class="pri" data-ps="copy">텍스트로 복사</button><button data-ps="close">닫기</button></div>'
+       +'<div class="hint">스크린샷해서 영수증 옆에 두세요. 두 장 세트입니다.</div>';
+    }
+    sh.innerHTML=h;
+  }
+  var PCOUNT={open:0,skip:0};try{var pc=JSON.parse(localStorage.getItem("gundle-pocket")||"null");if(pc)PCOUNT=pc}catch(e){}
+  $("#pocket").addEventListener("click",function(){PST.preset=state.preset;pocketStage(1);$("#pocketov").classList.add("on")});
+  document.addEventListener("click",function(e){
+    var p=e.target.closest("[data-pp]");if(p){PST.preset=p.dataset.pp;pocketStage(2);return}
+    var l=e.target.closest("[data-pl]");if(l){PST.len=l.dataset.pl;pocketStage(2);return}
+    var b=e.target.closest("[data-ps]");if(!b)return;
+    var v=b.dataset.ps;
+    if(v==="close"){if($("#cheat")===null)PCOUNT.skip++;$("#pocketov").classList.remove("on");save();return}
+    if(v==="copy"){copy($("#cheat").textContent.replace(/\s+/g," ").trim(),"쪽지 복사. 시험장 반입은 책임지지 않습니다");return}
+    if(v==="3")PCOUNT.open++;
+    pocketStage(parseInt(v,10));save();
+    function save(){try{localStorage.setItem("gundle-pocket",JSON.stringify(PCOUNT))}catch(x){}}
+  });
+  $("#pocketov").addEventListener("click",function(e){if(e.target===this)this.classList.remove("on")});
 
   renderHome();renderBook();
   var h=location.hash.slice(1);
