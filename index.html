@@ -273,6 +273,26 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--orange);outline-off
 .rwrap .after{transition:opacity .35s ease, transform .35s ease}
 .rwrap.hold .after{opacity:0;transform:translateY(6px);pointer-events:none}
 @media (prefers-reduced-motion:reduce){.receipt.feed,.receipt.torn{animation:none}.rwrap .after{transition:none}}
+
+/* 일러두기 — 처음 한 번. 책 맨 앞 페이지처럼. */
+.intro{position:fixed;inset:0;z-index:40;background:var(--paper);display:none;overflow:auto;word-break:keep-all}
+.intro.on{display:block;animation:in .35s ease}
+.intro .in{max-width:430px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;padding:calc(36px + env(safe-area-inset-top,0px)) max(24px,env(safe-area-inset-right,0px)) calc(24px + env(safe-area-inset-bottom,0px)) max(24px,env(safe-area-inset-left,0px))}
+.intro .logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px}
+.intro .logo img{width:34px;height:34px;border-radius:9px}
+.intro .logo i{color:var(--orange);font-style:normal}
+.intro h1{font-family:var(--serif);font-weight:600;font-size:15px;letter-spacing:.3em;color:var(--ink-2);margin:32px 0 4px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+.intro ol{list-style:none;margin:8px 0 0;padding:0;counter-reset:n}
+.intro li{counter-increment:n;display:grid;grid-template-columns:28px 1fr;gap:6px;padding:16px 0;border-bottom:1px solid var(--line)}
+.intro li::before{content:counter(n);font-family:var(--serif);font-weight:600;font-size:18px;color:var(--orange);line-height:1.5}
+.intro li b{display:block;font-family:var(--serif);font-weight:600;font-size:20px;line-height:1.5}
+.intro li span{display:block;font-size:15.5px;color:var(--ink-2);line-height:1.6;margin-top:2px}
+.intro .case{font-family:var(--serif);font-weight:600;font-size:21px;line-height:1.55;margin:18px 0 10px;background:var(--paper-2);border-radius:14px;padding:16px 18px}
+.intro .case small{display:block;font-family:var(--sans);font-weight:700;font-size:13px;color:var(--orange);margin-bottom:6px}
+.intro .go{margin-top:auto;padding-top:28px}
+.intro .go button{width:100%;background:var(--orange);color:var(--orange-ink);border-radius:12px;padding:16px;font-size:17px;font-weight:700;min-height:56px}
+.intro .sign{text-align:right;font-size:13px;color:var(--ink-2);margin-top:14px;font-family:var(--serif)}
+.pill{cursor:pointer}
 </style>
 
 </head>
@@ -282,7 +302,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--orange);outline-off
 <section class="screen on" id="home">
   <div class="bar">
     <div class="brand"><img src="assets/logo.png" alt="">건들북<i>.</i></div>
-    <div class="pill">안 읽어도 됩니다</div>
+    <button class="pill" id="pill" aria-label="일러두기 다시 보기">안 읽어도 됩니다</button>
   </div>
   <div class="hero">
     <h1>오늘 대화에 나올 책,<br>3분 만에 챙기기</h1>
@@ -413,6 +433,20 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--orange);outline-off
 </div>
 <div class="ov" id="pocketov" role="dialog" aria-modal="true">
   <div class="sheet" id="psheet"></div>
+</div>
+<div class="intro" id="intro" role="dialog" aria-modal="true" aria-labelledby="introh">
+  <div class="in">
+    <div class="logo"><img src="assets/logo.png" alt="">건들북<i>.</i></div>
+    <h1 id="introh">일러두기</h1>
+    <p class="case"><small>이럴 때 씁니다</small>내일 모임에서 『모순』 얘기가 나올 것 같은데,<br>아직 안 읽었다.</p>
+    <ol>
+      <li><div><b>읽는 앱이 아닙니다.</b><span>제목만 아는 책을, 대화에서 버틸 만큼만 챙겨드립니다.</span></div></li>
+      <li><div><b>한 권에 3분.</b><span>누가 누구인지, 핵심 세 개, 써먹을 한마디. 다섯 장 넘기면 끝입니다.</span></div></li>
+      <li><div><b>끝나면 영수증이 나옵니다.</b><span>읽은 시간 0분. 자랑하셔도 됩니다. 다들 그렇습니다.</span></div></li>
+    </ol>
+    <div class="go"><button id="introgo">책장 보러 가기</button></div>
+    <div class="sign">— 건들 편집부 (안 읽음)</div>
+  </div>
 </div>
 <div class="toast" id="toast">복사했습니다</div>
 
@@ -956,6 +990,13 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--orange);outline-off
     mine("poll:next",o);paintNext();sbBump("poll:next",o).then(paintNext);
   });
   paintNext();sbGet("poll:next").then(paintNext);
+
+  /* 일러두기 — 처음 온 사람에게 한 번만. 다시 보려면 홈의 「안 읽어도 됩니다」 */
+  var seen=false;try{seen=localStorage.getItem("gundle-intro")==="1"}catch(e){}
+  function closeIntro(){$("#intro").classList.remove("on");try{localStorage.setItem("gundle-intro","1")}catch(e){}}
+  $("#introgo").addEventListener("click",closeIntro);
+  $("#pill").addEventListener("click",function(){$("#intro").classList.add("on")});
+  if(!seen)$("#intro").classList.add("on");
   renderHome();renderBook();
   var h=location.hash.slice(1);
   show(h&&h!=="home"&&ORDER.indexOf(h)>0?"home":"home");
