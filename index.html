@@ -195,6 +195,15 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--orange);outline-off
 .poll .opts{display:flex;gap:8px}
 .poll .opt{flex:1;border:1.5px solid var(--line);border-radius:10px;padding:10px;font-size:14px;font-weight:700;min-height:44px}
 .poll .opt.on{background:var(--orange);color:var(--orange-ink);border-color:var(--orange)}
+.poll.next{max-width:none;margin-top:24px}
+.nopts{display:flex;flex-direction:column;gap:8px}
+.nopt{position:relative;overflow:hidden;display:flex;justify-content:space-between;align-items:center;border:1.5px solid var(--line);border-radius:10px;padding:11px 14px;min-height:48px;text-align:left;font-size:15.5px;font-weight:600}
+.nopt small{font-weight:500;font-size:13px;color:var(--ink-2);margin-left:6px}
+.nopt .pct{font-size:13.5px;color:var(--ink-2);font-variant-numeric:tabular-nums;position:relative}
+.nopt .bar{position:absolute;inset:0 auto 0 0;width:0;background:var(--sage);transition:width .6s cubic-bezier(.2,.8,.2,1)}
+.nopt .tx{position:relative}
+.nopt.on{border-color:var(--orange)}
+.nopt:disabled{opacity:1;cursor:default}
 .poll .pn{font-size:13.5px;color:var(--ink-2);margin-top:8px}
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:999px;font-size:15px;opacity:0;transition:.25s;pointer-events:none;z-index:20;white-space:nowrap}
 .toast.show{opacity:1;transform:translateX(-50%)}
@@ -285,6 +294,12 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--orange);outline-off
   <div class="shelf">
     <h3>이번 주 많이 물어본 책 <span>전체</span></h3>
     <div class="shelfrow" id="shelf"></div>
+  </div>
+  <div class="poll next" id="nextpoll">
+    <div class="k">다음에 건드릴 책</div>
+    <div class="q">먼저 건드렸으면 하는 책을 골라주세요.</div>
+    <div class="nopts" id="nopts"></div>
+    <div class="pn" id="nextn">편집부 일손이 아직 모자랍니다. 표가 많은 책부터 한 권씩 올리겠습니다.</div>
   </div>
   <div class="shelf" id="movieshelf" hidden>
     <h3>건들무비 <span>예고편만 완람한 것들</span></h3>
@@ -911,6 +926,22 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--orange);outline-off
     printT.push(setTimeout(function(){pr.classList.remove("printing");rc.classList.remove("feed");rc.classList.add("torn")},2300));
     printT.push(setTimeout(function(){w.classList.remove("hold");if(!TERMS)openTerms()},2650));
   }
+
+  /* 다음에 건드릴 책 — 정중하게 묻고, 표 많은 순서로 올린다 */
+  var NEXT=[["courage","미움받을 용기","기시미 이치로"],["crime","죄와 벌","도스토옙스키"],["gatsby","위대한 개츠비","피츠제럴드"],["solitude","백년의 고독","마르케스"],["rye","호밀밭의 파수꾼","샐린저"],["pachinko","파친코","이민진"]];
+  function paintNext(){
+    var c=CNT["poll:next"]||{},my=mine("poll:next"),tot=0;NEXT.forEach(function(x){tot+=c[x[0]]||0});
+    $("#nopts").innerHTML=NEXT.map(function(x){
+      var n=c[x[0]]||0,p=tot?Math.round(n*100/tot):0,show=my&&tot>=10;
+      return '<button class="nopt'+(my===x[0]?' on':'')+'" data-next="'+x[0]+'"'+(my?' disabled':'')+'><span class="bar" style="width:'+(show?p:0)+'%"></span><span class="tx">'+x[1]+'<small>'+x[2]+'</small></span><span class="pct">'+(show?p+'%':(my===x[0]?'✓':''))+'</span></button>'}).join("");
+    if(my)$("#nextn").textContent=tot>=10?"고맙습니다. 표가 모이는 대로 먼저 올리겠습니다.":"고맙습니다. 아직 표가 적어서 결과는 조금 뒤에 보여드릴게요.";
+  }
+  document.addEventListener("click",function(e){
+    var b=e.target.closest("[data-next]");if(!b||mine("poll:next"))return;
+    var o=b.dataset.next,c=CNT["poll:next"]=CNT["poll:next"]||{};c[o]=(c[o]||0)+1;
+    mine("poll:next",o);paintNext();sbBump("poll:next",o).then(paintNext);
+  });
+  paintNext();sbGet("poll:next").then(paintNext);
   renderHome();renderBook();
   var h=location.hash.slice(1);
   show(h&&h!=="home"&&ORDER.indexOf(h)>0?"home":"home");
