@@ -680,7 +680,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--orange);outline-off
   function renderBook(){
     var b=B();
     $$(".bt").forEach(function(e){e.textContent=(b.type==="movie"?"건들무비 · ":"")+"《"+b.title+"》"});
-    $("#who h2").innerHTML=b.type==="movie"?"누가 누구인지만<br>챙기면 됩니다.":"누가 누구인지만<br>챙기면 됩니다.";
+    $("#who h2").innerHTML=b.kind==="nonfic"?"누가 뭐라고 했는지만<br>챙기면 됩니다.":"누가 누구인지만<br>챙기면 됩니다.";
     $("#test h2").innerHTML=b.type==="movie"?"진짜 본 사람이<br>나타났습니다.":"진짜 읽은 사람이<br>나타났습니다.";
     $("#people").innerHTML=b.people.map(function(p){return '<div class="person"><div class="av'+(p.lead?' lead':'')+'">'+p.n.charAt(0)+'</div><div><b>'+p.n+(p.r?' <small>'+p.r+'</small>':'')+'</b><span>'+p.d+'</span></div></div>'}).join("");
     $("#summary").innerHTML=pen(b.summary,"who");$("#joke").innerHTML=b.joke;$("#whonote").textContent=b.whonote;
@@ -793,7 +793,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--orange);outline-off
     function R(k,v){rows.push([k,v])}
     if(mv){R("상영관","거실");R("좌석","소파 B2");R("포맷","유튜브 요약 (세로)");R("관람 시간","0분")}else{R("읽은 시간","0분")}
     R("건드린 시간",Math.floor(s/60)+"분 "+(s%60)+"초");
-    R(mv?"챙긴 배역":"챙긴 인물",b.people.length+"명");
+    R(mv?"챙긴 배역":b.kind==="nonfic"?"챙긴 개념":"챙긴 인물",b.people.length+(b.kind==="nonfic"?"개":"명"));
     R("챙긴 한마디","1개 · "+PRESETS[state.preset].name+"용");
     if(penCount())R("밑줄",penCount()+"줄");
     R("뒤집은 꼬리질문",n+" / 3");
@@ -874,7 +874,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--orange);outline-off
       var pn=PENS[state.book]||{},L=b.lines[PST.preset],LEN2={"3":"3분","30":"30분","all":"완독한 척"};
       var items=[];
       function it(t,sub,u){items.push('<li>'+(u?'<span class="u">'+esc(t)+'</span>':esc(t))+(sub?'<small>'+esc(sub)+'</small>':'')+'</li>')}
-      if(pn.who)it(pn.who,"누가 누구",1);
+      if(pn.who)it(pn.who,b.kind==="nonfic"?"핵심 주장":"누가 누구",1);
       if(pn.three)it(pn.three,"포인트",1);
       if(pn.line&&pn.line[PST.preset])it(pn.line[PST.preset],PRESETS[PST.preset].name+"용 한마디",1);
       if(pn.test)it(pn.test,"걸렸을 때",1);
