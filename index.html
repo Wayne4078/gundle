@@ -246,6 +246,24 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--orange);outline-off
 .cheat li small{display:block;font-family:var(--sans);font-weight:500;font-size:13px;color:#7a6f58;margin-top:2px}
 .cheat .sec{font-family:var(--sans);font-size:11px;font-weight:700;color:#a33;margin:12px 0 6px;letter-spacing:.04em}
 .cheat .stamp{display:inline-block;margin-top:10px;border:2px solid rgba(190,40,30,.7);color:rgba(190,40,30,.85);font-family:var(--sans);font-weight:800;font-size:11px;letter-spacing:.04em;padding:5px 8px;transform:rotate(-3deg);border-radius:3px}
+
+/* 영수증 인쇄 — 잠깐 멈췄다가, 감열 프린터처럼 위에서부터 끊기며 나온다 */
+.printer{width:100%;max-width:360px;display:flex;flex-direction:column;align-items:center;position:relative;margin-top:18px}
+.slot{width:100%;height:14px;border-radius:7px;background:linear-gradient(#2b3038,#14171c);box-shadow:inset 0 2px 3px rgba(0,0,0,.5),0 1px 0 rgba(255,255,255,.06);position:relative;z-index:2}
+.slot::after{content:"";position:absolute;left:10px;right:10px;top:6px;height:2px;border-radius:1px;background:#050607}
+.slot .led{position:absolute;right:8px;top:-19px;font-size:11.5px;color:var(--ink-2);display:flex;align-items:center;gap:5px;opacity:0;transition:opacity .2s}
+.slot .led i{width:6px;height:6px;border-radius:50%;background:#2ecc71;display:inline-block}
+.printing .slot .led{opacity:1}
+.printing .slot .led i{animation:blink .35s steps(2) infinite}
+@keyframes blink{50%{opacity:.2}}
+.printer .receipt{margin-top:-4px}
+.receipt.feed{animation:feed 1.7s steps(16,end) .55s both}
+@keyframes feed{from{clip-path:inset(0 0 100% 0);transform:translateY(-14px)}to{clip-path:inset(0 0 0 0);transform:translateY(0)}}
+.receipt.torn{animation:tear .35s ease-out}
+@keyframes tear{0%{transform:translateY(0) rotate(0)}35%{transform:translateY(5px) rotate(-.6deg)}70%{transform:translateY(1px) rotate(.25deg)}100%{transform:none}}
+.rwrap .after{transition:opacity .35s ease, transform .35s ease}
+.rwrap.hold .after{opacity:0;transform:translateY(6px);pointer-events:none}
+@media (prefers-reduced-motion:reduce){.receipt.feed,.receipt.torn{animation:none}.rwrap .after{transition:none}}
 </style>
 
 </head>
@@ -334,7 +352,8 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--orange);outline-off
 
 <section class="screen" id="receipt">
   <div class="bar"><button class="back" data-go="test">‹ 이전</button><div class="crumb">5 / 5</div></div>
-  <div class="rwrap">
+  <div class="rwrap" id="rwrap">
+    <div class="printer" id="printer"><div class="slot"><span class="led"><i></i>인쇄 중</span></div>
     <div class="receipt" id="rc">
       <div class="h"><b id="rhead">건들북 영수증</b><span id="rno"></span></div>
       <hr>
@@ -349,19 +368,20 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--orange);outline-off
       <div class="fine" id="rfine">* 예상 버티는 시간은 농담입니다. 진짜 읽으면 무제한.</div>
       <div class="terms" id="rterms"></div>
     </div>
-    <div class="racts"><button class="pri" id="copyrc">텍스트로 복사</button><button data-go="home">다른 책도 3분</button></div>
-    <div class="rhint" id="rhint">스크린샷해서 스레드·스토리에 올리세요. 자백이 밈입니다.</div>
-    <div class="poll">
+    </div>
+    <div class="racts after"><button class="pri" id="copyrc">텍스트로 복사</button><button data-go="home">다른 책도 3분</button></div>
+    <div class="rhint after" id="rhint">스크린샷해서 스레드·스토리에 올리세요. 자백이 밈입니다.</div>
+    <div class="poll after">
       <div class="k">한 가지만 여쭐게요</div>
       <div class="q">건들무비, 나와도 될까요?</div>
       <div class="opts"><button class="opt" data-poll="yes">보고 싶다</button><button class="opt" data-poll="no">책이면 충분</button></div>
       <div class="pn" id="polln">영화는 개봉 첫 주에만 챙겨드릴 수 있어서, 수요를 먼저 봅니다.</div>
     </div>
-    <div class="rlinks">
+    <div class="rlinks after">
       <a id="rstore" href="#" target="_blank" rel="noopener">여기까지 왔으면 그냥 읽으세요 <small>서점 ↗</small></a>
       <button data-go="who"><span id="rrestart"></span> <small>1 / 5</small></button>
     </div>
-    <button class="pocket" id="pocket" aria-label="봉인"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9c0-2.8 2.2-5 5-5s5 2.2 5 5c0 1.2-.4 2-1 2.8 1.9 1.3 3 3.3 3 5.7 0 1.4-1.1 2.5-2.5 2.5h-9A2.5 2.5 0 0 1 5 17.5c0-2.4 1.1-4.4 3-5.7C7.4 11 7 10.2 7 9z"/><path d="M8 11.8h8"/><circle cx="12" cy="16" r="1.4" fill="currentColor" stroke="none"/></svg></button>
+    <button class="pocket after" id="pocket" aria-label="봉인"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9c0-2.8 2.2-5 5-5s5 2.2 5 5c0 1.2-.4 2-1 2.8 1.9 1.3 3 3.3 3 5.7 0 1.4-1.1 2.5-2.5 2.5h-9A2.5 2.5 0 0 1 5 17.5c0-2.4 1.1-4.4 3-5.7C7.4 11 7 10.2 7 9z"/><path d="M8 11.8h8"/><circle cx="12" cy="16" r="1.4" fill="currentColor" stroke="none"/></svg></button>
   </div>
 </section>
 
@@ -676,7 +696,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--orange);outline-off
     if(id==="receipt")fillReceipt();
     if(location.hash!=="#"+id)history.replaceState(null,"","#"+id);
     drawPens($("#"+id));
-    if(id==="receipt"&&!TERMS)openTerms();
+    if(id==="receipt")printReceipt();
   }
   document.addEventListener("click",function(e){
     var st=e.target.closest("[data-start]");
@@ -854,6 +874,19 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--orange);outline-off
   });
   $("#pocketov").addEventListener("click",function(e){if(e.target===this)this.classList.remove("on")});
 
+
+  /* 영수증 인쇄 연출 */
+  var printT=[];
+  function printReceipt(){
+    printT.forEach(clearTimeout);printT=[];
+    var rc=$("#rc"),w=$("#rwrap"),pr=$("#printer");
+    var reduce=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if(reduce){if(!TERMS)openTerms();return}
+    rc.classList.remove("feed","torn");void rc.offsetWidth;
+    w.classList.add("hold");pr.classList.add("printing");rc.classList.add("feed");
+    printT.push(setTimeout(function(){pr.classList.remove("printing");rc.classList.remove("feed");rc.classList.add("torn")},2300));
+    printT.push(setTimeout(function(){w.classList.remove("hold");if(!TERMS)openTerms()},2650));
+  }
   renderHome();renderBook();
   var h=location.hash.slice(1);
   show(h&&h!=="home"&&ORDER.indexOf(h)>0?"home":"home");
