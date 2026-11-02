@@ -286,13 +286,23 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--orange);outline-off
 .intro li{counter-increment:n;display:grid;grid-template-columns:28px 1fr;gap:6px;padding:16px 0;border-bottom:1px solid var(--line)}
 .intro li::before{content:counter(n);font-family:var(--serif);font-weight:600;font-size:18px;color:var(--orange);line-height:1.5}
 .intro li b{display:block;font-family:var(--serif);font-weight:600;font-size:20px;line-height:1.5}
-.intro li span{display:block;font-size:15.5px;color:var(--ink-2);line-height:1.6;margin-top:2px}
+.intro li span:not(.crayon){display:block;font-size:15.5px;color:var(--ink-2);line-height:1.6;margin-top:2px}
 .intro .case{font-family:var(--serif);font-weight:600;font-size:21px;line-height:1.55;margin:18px 0 10px;background:var(--paper-2);border-radius:14px;padding:16px 18px}
 .intro .case small{display:block;font-family:var(--sans);font-weight:700;font-size:13px;color:var(--orange);margin-bottom:6px}
 .intro .go{margin-top:auto;padding-top:28px}
 .intro .go button{width:100%;background:var(--orange);color:var(--orange-ink);border-radius:12px;padding:16px;font-size:17px;font-weight:700;min-height:56px}
 .intro .sign{text-align:right;font-size:13px;color:var(--ink-2);margin-top:14px;font-family:var(--serif)}
 .pill{cursor:pointer}
+
+/* 빨간 색연필 — 참고서에 줄 긋듯, 위에서부터 한 줄씩 */
+.crayon{position:relative;display:inline;white-space:nowrap}
+.crayon svg{position:absolute;left:-3px;bottom:-10px;overflow:visible;pointer-events:none}
+.crayon path{fill:none;stroke:#D8352A;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:100 104;stroke-dashoffset:102}
+.crayon path.a{stroke-width:3.4;opacity:.85}
+.crayon path.b{stroke-width:1.6;opacity:.45}
+.crayon.go path{transition:stroke-dashoffset .55s cubic-bezier(.4,.1,.3,1)}
+.crayon.go path{stroke-dashoffset:0}
+@media (prefers-reduced-motion:reduce){.crayon path{stroke-dashoffset:0}.crayon.go path{transition:none}}
 </style>
 
 </head>
@@ -438,11 +448,11 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--orange);outline-off
   <div class="in">
     <div class="logo"><img src="assets/logo.png" alt="">건들북<i>.</i></div>
     <h1 id="introh">일러두기</h1>
-    <p class="case"><small>이럴 때 씁니다</small>내일 모임에서 『모순』 얘기가 나올 것 같은데,<br>아직 안 읽었다.</p>
+    <p class="case"><small>이럴 때 씁니다</small>내일 모임에서 『모순』 얘기가 나올 것 같은데,<br><span class="crayon">아직 안 읽었다.</span></p>
     <ol>
-      <li><div><b>읽는 앱이 아닙니다.</b><span>제목만 아는 책을, 대화에서 버틸 만큼만 챙겨드립니다.</span></div></li>
-      <li><div><b>한 권에 3분.</b><span>누가 누구인지, 핵심 세 개, 써먹을 한마디. 다섯 장 넘기면 끝입니다.</span></div></li>
-      <li><div><b>끝나면 영수증이 나옵니다.</b><span>읽은 시간 0분. 자랑하셔도 됩니다. 다들 그렇습니다.</span></div></li>
+      <li><div><b><span class="crayon">읽는 앱이 아닙니다.</span></b><span>제목만 아는 책을, 대화에서 버틸 만큼만 챙겨드립니다.</span></div></li>
+      <li><div><b><span class="crayon">한 권에 3분.</span></b><span>누가 누구인지, 핵심 세 개, 써먹을 한마디. 다섯 장 넘기면 끝입니다.</span></div></li>
+      <li><div><b><span class="crayon">끝나면 영수증이 나옵니다.</span></b><span>읽은 시간 0분. 자랑하셔도 됩니다. 다들 그렇습니다.</span></div></li>
     </ol>
     <div class="go"><button id="introgo">책장 보러 가기</button></div>
     <div class="sign">— 건들 편집부 (안 읽음)</div>
@@ -991,12 +1001,33 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--orange);outline-off
   });
   paintNext();sbGet("poll:next").then(paintNext);
 
+
+  /* 일러두기 색연필: 단어 실제 폭에 맞춰 손으로 그은 듯한 선, 0.65초 간격으로 위에서부터 */
+  var crayT=[];
+  function crayonSVG(w,seed){
+    var r=function(n){seed=(seed*9301+49297)%233280;return seed/233280*n};
+    var x0=-3,x1=w+3,y=function(b){return (b+r(2.4)).toFixed(1)};
+    var d="M"+x0+" "+y(8)+" C "+(w*.25).toFixed(1)+" "+y(6)+", "+(w*.5).toFixed(1)+" "+y(8)+", "+(w*.7).toFixed(1)+" "+y(7)+" S "+(w*.95).toFixed(1)+" "+y(5)+", "+x1+" "+y(7);
+    var d2="M"+(x0+4)+" "+y(9)+" C "+(w*.3).toFixed(1)+" "+y(8)+", "+(w*.6).toFixed(1)+" "+y(9.5)+", "+(x1-2)+" "+y(8);
+    return '<svg width="'+(w+6)+'" height="14" viewBox="-3 0 '+(w+6)+' 14" aria-hidden="true"><g filter="url(#cray)"><path class="a" pathLength="100" d="'+d+'"/><path class="b" pathLength="100" d="'+d2+'"/></g></svg>';
+  }
+  function drawCrayons(){
+    crayT.forEach(clearTimeout);crayT=[];
+    if(!$("#crayf"))document.body.insertAdjacentHTML("beforeend",'<svg id="crayf" width="0" height="0" style="position:absolute"><filter id="cray" x="-5%" y="-100%" width="110%" height="300%"><feTurbulence type="fractalNoise" baseFrequency="1.4 .8" numOctaves="2" seed="4"/><feDisplacementMap in="SourceGraphic" scale="2.4"/></filter></svg>');
+    $$(".crayon").forEach(function(c,i){
+      var old=c.querySelector("svg");if(old)old.remove();c.classList.remove("go");
+      var w=Math.round(c.getBoundingClientRect().width)||120;
+      c.insertAdjacentHTML("beforeend",crayonSVG(w,i*11+7));
+      void c.offsetWidth;
+      crayT.push(setTimeout(function(){c.classList.add("go")},500+i*650));
+    });
+  }
   /* 일러두기 — 처음 온 사람에게 한 번만. 다시 보려면 홈의 「안 읽어도 됩니다」 */
   var seen=false;try{seen=localStorage.getItem("gundle-intro")==="1"}catch(e){}
   function closeIntro(){$("#intro").classList.remove("on");try{localStorage.setItem("gundle-intro","1")}catch(e){}}
   $("#introgo").addEventListener("click",closeIntro);
-  $("#pill").addEventListener("click",function(){$("#intro").classList.add("on")});
-  if(!seen)$("#intro").classList.add("on");
+  $("#pill").addEventListener("click",function(){$("#intro").classList.add("on");drawCrayons()});
+  if(!seen){$("#intro").classList.add("on");(document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(drawCrayons)}
   renderHome();renderBook();
   var h=location.hash.slice(1);
   show(h&&h!=="home"&&ORDER.indexOf(h)>0?"home":"home");
