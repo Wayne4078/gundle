@@ -8,6 +8,9 @@
 <meta property="og:title" content="건들북 — 읽지 말고, 건드리세요.">
 <meta property="og:description" content="제목만 아는 책을 3분 만에 대화용으로. 양심 가격 0원.">
 <meta property="og:image" content="https://wayne4078.github.io/gundle/assets/og.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta property="og:url" content="https://wayne4078.github.io/gundle/"><meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="assets/logo.png">
 <link rel="apple-touch-icon" href="assets/logo.png">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}img{max-width:100%}[hidden]{display:none!important}</style>
@@ -130,7 +133,16 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--orange);outline-off
 .vote .n{display:block;font-size:22px;font-variant-numeric:tabular-nums;letter-spacing:-.02em;margin-top:2px}
 .vote.on{border-color:var(--orange);background:var(--orange);color:var(--orange-ink)}
 .vote.on2{border-color:var(--ink);background:var(--ink);color:var(--paper)}
-.voten{font-size:14px;color:var(--ink-2);margin-top:8px}
+.voten{font-size:14px;color:var(--ink-2);margin-top:10px}
+.voten b{color:var(--ink);font-variant-numeric:tabular-nums}
+.ask{margin-top:18px;border:1.5px solid var(--orange);border-radius:16px;padding:16px}
+.ask .k{font-size:13px;color:var(--orange);font-weight:700}
+.ask .q{font-family:var(--serif);font-weight:600;font-size:19px;line-height:1.5;margin:6px 0 6px}
+.ask .l{font-size:15px;color:var(--ink-2);line-height:1.55;margin-bottom:12px}
+.ask .opts{display:flex;gap:8px}
+.ask .opt{flex:1;border:1.5px solid var(--line);border-radius:10px;padding:12px;font-size:16px;font-weight:700;min-height:48px;background:var(--paper)}
+.ask .opt[data-ask="a"]{background:var(--orange);color:var(--orange-ink);border-color:var(--orange)}
+.ask .later{display:block;margin:10px auto 0;font-size:14px;color:var(--ink-2);padding:6px}
 
 .prob{display:flex;justify-content:space-between;align-items:baseline;font-size:14px;color:var(--ink-2);margin-bottom:8px}
 .prob b{font-size:28px;color:var(--ink);font-variant-numeric:tabular-nums;letter-spacing:-.02em;font-family:var(--serif)}
@@ -320,6 +332,13 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--orange);outline-off
   </div>
   <div class="chips" id="presets" role="radiogroup" aria-label="오늘 상황"></div>
   <div class="chiplabel" id="presetlabel"></div>
+  <div class="ask" id="ask" hidden>
+    <div class="k">편집부가 여쭙니다</div>
+    <div class="q" id="askq"></div>
+    <div class="l" id="askl"></div>
+    <div class="opts"><button class="opt" data-ask="a">통했다</button><button class="opt" data-ask="b">걸렸다</button></div>
+    <button class="later" data-ask="later">아직 못 써봤어요</button>
+  </div>
   <div class="today" id="today"></div>
   <div class="shelf">
     <h3>이번 주 많이 물어본 책 <span>전체</span></h3>
@@ -373,11 +392,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--orange);outline-off
       <p class="l" id="ll"></p>
       <div class="row"><button class="copy" id="copyline">문장 복사</button><div class="next" id="ln"></div></div>
     </div>
-    <div class="votes">
-      <button class="vote" id="v1">통했다<span class="n">0</span></button>
-      <button class="vote" id="v2">걸렸다<span class="n">0</span></button>
-    </div>
-    <div class="voten"></div>
+    <div class="voten" id="tally"></div>
   </div>
   <div class="nav"><button class="prev" data-go="three">‹ 이전</button><div class="pg"><b>3</b> / 5</div><button class="go" data-go="test">다음 ›</button></div>
 </section>
@@ -749,7 +764,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--orange);outline-off
   function renderLine(){
     var b=B(),p=PRESETS[state.preset],l=b.lines[state.preset];
     $("#presets2").innerHTML=Object.keys(PRESETS).map(function(k){return '<button class="chip'+(k===state.preset?" on":"")+'" data-p="'+k+'">'+PRESETS[k].name+'</button>'}).join("");
-    $("#lk").textContent=b.type==="movie"?p.k.replace("책","영화"):p.k;$("#ll").innerHTML=pen(l.line,"line");drawPens($("#line"));if(typeof renderVotes==="function"&&$("#v1"))renderVotes();$("#ln").innerHTML=l.next;
+    $("#lk").textContent=b.type==="movie"?p.k.replace("책","영화"):p.k;$("#ll").innerHTML=pen(l.line,"line");drawPens($("#line"));if(typeof renderVotes==="function"&&$("#tally"))renderVotes();$("#ln").innerHTML=l.next;
   }
   document.addEventListener("click",function(e){
     var c=e.target.closest(".chip[data-p]");if(!c)return;
@@ -765,7 +780,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--orange);outline-off
     $$(".screen").forEach(function(s){s.classList.toggle("on",s.id===id)});
     window.scrollTo(0,0);
     if(id==="who"&&!state.t0)startTimer();
-    if(id==="home"){stopTimer();state.t0=null;}
+    if(id==="home"){stopTimer();state.t0=null;renderAsk();}
     if(id==="receipt")fillReceipt();
     if(location.hash!=="#"+id)history.replaceState(null,"","#"+id);
     drawPens($("#"+id));
@@ -808,20 +823,32 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--orange);outline-off
   /* votes */
   function VK(){return "vote:"+state.book+":"+state.preset}
   function paintVotes(){
-    var k=VK(),c=CNT[k]||{},a=c.a||0,b=c.b||0,my=mine(k),few=a+b<10;
-    $("#v1 .n").textContent=few?"":a;$("#v2 .n").textContent=few?"":b;
-    $("#v1").classList.toggle("on",my==="a");$("#v2").classList.toggle("on2",my==="b");
-    $(".voten").textContent=few?"아직 몇 분 안 써보셨어요. 첫 타자 되실래요?":"써보신 분들의 투표입니다. 「걸렸다」가 많은 한마디는 편집부가 고칩니다.";
+    var k=VK(),c=CNT[k]||{},a=c.a||0,b=c.b||0;
+    $("#tally").innerHTML=a+b>=10?"써보신 분들 — 통했다 <b>"+a+"</b> · 걸렸다 <b>"+b+"</b>":"";
   }
   function renderVotes(){var k=VK();paintVotes();sbGet(k).then(function(){if(k===VK())paintVotes()})}
-  function castVote(o){
-    var k=VK(),prev=mine(k);if(prev===o)return;
-    var c=CNT[k]=CNT[k]||{};c[o]=(c[o]||0)+1;if(prev)c[prev]=Math.max((c[prev]||0)-1,0);
-    mine(k,o);paintVotes();sbBump(k,o,prev).then(function(){if(k===VK())paintVotes()});
-    toast(o==="a"?"통했다 +1":"걸렸다 +1. 편집부가 한마디를 고칩니다");
+  /* 통했다/걸렸다는 써먹고 나서 묻는다 — 영수증 받은 뒤 1시간 지나 다시 오면 홈에서 */
+  var PEND=[];try{PEND=JSON.parse(localStorage.getItem("gundle-pending")||"[]")||[]}catch(e){}
+  function savePend(){try{localStorage.setItem("gundle-pending",JSON.stringify(PEND.slice(-5)))}catch(e){}}
+  function addPending(){
+    var k="vote:"+state.book+":"+state.preset;if(mine(k))return;
+    PEND=PEND.filter(function(x){return x.k!==k});PEND.push({k:k,book:state.book,preset:state.preset,t:Date.now()});savePend();
   }
-  $("#v1").addEventListener("click",function(){castVote("a")});
-  $("#v2").addEventListener("click",function(){castVote("b")});
+  function duePending(){var now=Date.now();for(var i=PEND.length-1;i>=0;i--){if(now-PEND[i].t>=3600000&&!mine(PEND[i].k))return PEND[i]}return null}
+  function renderAsk(){
+    var d=duePending(),el=$("#ask");if(!d||!BOOKS[d.book]){el.hidden=true;return}
+    el.hidden=false;el.dataset.k=d.k;
+    $("#askq").innerHTML="지난번 《"+BOOKS[d.book].title+"》 "+PRESETS[d.preset].name+" 한마디,<br>써보셨어요?";
+    $("#askl").textContent="「"+BOOKS[d.book].lines[d.preset].line+"」";
+  }
+  document.addEventListener("click",function(e){
+    var b=e.target.closest("[data-ask]");if(!b)return;
+    var k=$("#ask").dataset.k,o=b.dataset.ask;
+    PEND=PEND.filter(function(x){return x.k!==k});savePend();
+    if(o!=="later"){mine(k,o);sbBump(k,o);toast(o==="a"?"통했다. 축하드립니다":"걸렸다. 편집부가 한마디를 고칩니다")}
+    else toast("다음에 여쭐게요");
+    renderAsk();
+  });
 
   /* poll */
     document.addEventListener("click",function(e){
@@ -864,7 +891,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--orange);outline-off
     $("#rno").textContent="No. "+("000"+no).slice(-4)+" · "+d.getFullYear()+"."+pad(d.getMonth()+1)+"."+pad(d.getDate())+" "+pad(d.getHours())+":"+pad(d.getMinutes());
     try{localStorage.setItem("gundle-no",String(no))}catch(e){}
     state.t0=null;
-    renderTerms();refreshTerms();
+    renderTerms();refreshTerms();addPending();
   }
   $("#copyrc").addEventListener("click",function(){
     var rows=$$("#rc .r:not(.danger)").map(function(r){var c=r.children;return c[0].textContent+" … "+c[c.length-1].textContent});
@@ -1028,7 +1055,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--orange);outline-off
   $("#introgo").addEventListener("click",closeIntro);
   $("#pill").addEventListener("click",function(){$("#intro").classList.add("on");drawCrayons()});
   if(!seen){$("#intro").classList.add("on");(document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(drawCrayons)}
-  renderHome();renderBook();
+  renderHome();renderBook();renderAsk();
   var h=location.hash.slice(1);
   show(h&&h!=="home"&&ORDER.indexOf(h)>0?"home":"home");
 })();
