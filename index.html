@@ -332,7 +332,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--orange);outline-off
       <button class="vote" id="v1">통했다<span class="n">0</span></button>
       <button class="vote" id="v2">걸렸다<span class="n">0</span></button>
     </div>
-    <div class="voten">써보신 분들의 투표입니다. 숫자는 시안용 예시입니다.</div>
+    <div class="voten"></div>
   </div>
   <div class="nav"><button class="prev" data-go="three">‹ 이전</button><div class="pg"><b>3</b> / 5</div><button class="go" data-go="test">다음 ›</button></div>
 </section>
@@ -676,7 +676,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--orange);outline-off
   function renderLine(){
     var b=B(),p=PRESETS[state.preset],l=b.lines[state.preset];
     $("#presets2").innerHTML=Object.keys(PRESETS).map(function(k){return '<button class="chip'+(k===state.preset?" on":"")+'" data-p="'+k+'">'+PRESETS[k].name+'</button>'}).join("");
-    $("#lk").textContent=b.type==="movie"?p.k.replace("책","영화"):p.k;$("#ll").innerHTML=pen(l.line,"line");drawPens($("#line"));$("#ln").innerHTML=l.next;
+    $("#lk").textContent=b.type==="movie"?p.k.replace("책","영화"):p.k;$("#ll").innerHTML=pen(l.line,"line");drawPens($("#line"));if(typeof renderVotes==="function"&&$("#v1"))renderVotes();$("#ln").innerHTML=l.next;
   }
   document.addEventListener("click",function(e){
     var c=e.target.closest(".chip[data-p]");if(!c)return;
@@ -722,19 +722,41 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--orange);outline-off
   function fallback(text){var ta=document.createElement("textarea");ta.value=text;document.body.appendChild(ta);ta.select();try{document.execCommand("copy")}catch(e){}document.body.removeChild(ta)}
   $("#copyline").addEventListener("click",function(){copy(B().lines[state.preset].line,"한마디 복사. 두 번 쓰면 들킵니다")});
 
+  /* 서버 — 숫자만 오가는 익명 카운터 (Supabase). 실패해도 앱은 그대로 돈다. */
+  var SB="https://jipczzzvapysovclfmpk.supabase.co/rest/v1/",SBK="sb_publishable_qDBpdstDd3lS16F-hbjAEw_JTbQJAbK";
+  var SBH={"apikey":SBK,"Content-Type":"application/json"};
+  var CNT={};
+  function toMap(rows){var m={};(rows||[]).forEach(function(r){m[r.opt]=Number(r.n)||0});return m}
+  function sbGet(key){return fetch(SB+"gundle_counts?select=opt,n&key=eq."+encodeURIComponent(key),{headers:SBH}).then(function(r){return r.ok?r.json():[]}).then(function(rows){CNT[key]=toMap(rows);return CNT[key]}).catch(function(){return CNT[key]||{}})}
+  function sbBump(key,o,prev){return fetch(SB+"rpc/gundle_bump",{method:"POST",headers:SBH,body:JSON.stringify({k:key,o:o,prev:prev||null})}).then(function(r){return r.ok?r.json():null}).then(function(rows){if(rows)CNT[key]=toMap(rows);return CNT[key]||{}}).catch(function(){return CNT[key]||{}})}
+  var MINE={};try{MINE=JSON.parse(localStorage.getItem("gundle-mine")||"{}")||{}}catch(e){}
+  function mine(k,v){if(v===undefined)return MINE[k];MINE[k]=v;try{localStorage.setItem("gundle-mine",JSON.stringify(MINE))}catch(e){}}
+
   /* votes */
-  function V(){if(!state.votes[state.book])state.votes[state.book]={a:B().votes[0],b:B().votes[1]};return state.votes[state.book]}
-  function renderVotes(){var v=V();$("#v1 .n").textContent=v.a;$("#v2 .n").textContent=v.b;$("#v1").classList.toggle("on",state.vote==="a");$("#v2").classList.toggle("on2",state.vote==="b")}
-  $("#v1").addEventListener("click",function(){var v=V();if(state.vote==="a")return;if(state.vote==="b")v.b--;v.a++;state.vote="a";renderVotes();toast("통했다 +1")});
-  $("#v2").addEventListener("click",function(){var v=V();if(state.vote==="b")return;if(state.vote==="a")v.a--;v.b++;state.vote="b";renderVotes();toast("걸렸다 +1. 편집부가 한마디를 고칩니다")});
+  function VK(){return "vote:"+state.book+":"+state.preset}
+  function paintVotes(){
+    var k=VK(),c=CNT[k]||{},a=c.a||0,b=c.b||0,my=mine(k),few=a+b<10;
+    $("#v1 .n").textContent=few?"":a;$("#v2 .n").textContent=few?"":b;
+    $("#v1").classList.toggle("on",my==="a");$("#v2").classList.toggle("on2",my==="b");
+    $(".voten").textContent=few?"아직 몇 분 안 써보셨어요. 첫 타자 되실래요?":"써보신 분들의 투표입니다. 「걸렸다」가 많은 한마디는 편집부가 고칩니다.";
+  }
+  function renderVotes(){var k=VK();paintVotes();sbGet(k).then(function(){if(k===VK())paintVotes()})}
+  function castVote(o){
+    var k=VK(),prev=mine(k);if(prev===o)return;
+    var c=CNT[k]=CNT[k]||{};c[o]=(c[o]||0)+1;if(prev)c[prev]=Math.max((c[prev]||0)-1,0);
+    mine(k,o);paintVotes();sbBump(k,o,prev).then(function(){if(k===VK())paintVotes()});
+    toast(o==="a"?"통했다 +1":"걸렸다 +1. 편집부가 한마디를 고칩니다");
+  }
+  $("#v1").addEventListener("click",function(){castVote("a")});
+  $("#v2").addEventListener("click",function(){castVote("b")});
 
   /* poll */
-  var POLL={yes:0,no:0};try{var pv=JSON.parse(localStorage.getItem("gundle-poll")||"null");if(pv)POLL=pv}catch(e){}
-  document.addEventListener("click",function(e){
+    document.addEventListener("click",function(e){
     var o=e.target.closest("[data-poll]");if(!o)return;
-    POLL[o.dataset.poll]++;try{localStorage.setItem("gundle-poll",JSON.stringify(POLL))}catch(x){}
+    if(mine("poll:movie"))return;
+    mine("poll:movie",o.dataset.poll);sbBump("poll:movie",o.dataset.poll);
     $$("[data-poll]").forEach(function(b){b.classList.toggle("on",b===o);b.disabled=true});
-    $("#polln").textContent="고맙습니다. 한 달 뒤에 결과로 답하겠습니다. (지금은 이 기기에만 저장)";
+    $("#polln").textContent="고맙습니다. 한 달 뒤에 결과로 답하겠습니다.";
   });
 
   /* flips */
@@ -769,7 +791,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--orange);outline-off
     $("#rno").textContent="No. "+("000"+no).slice(-4)+" · "+d.getFullYear()+"."+pad(d.getMonth()+1)+"."+pad(d.getDate())+" "+pad(d.getHours())+":"+pad(d.getMinutes());
     try{localStorage.setItem("gundle-no",String(no))}catch(e){}
     state.t0=null;
-    renderTerms();
+    renderTerms();refreshTerms();
   }
   $("#copyrc").addEventListener("click",function(){
     var rows=$$("#rc .r:not(.danger)").map(function(r){var c=r.children;return c[0].textContent+" … "+c[c.length-1].textContent});
@@ -790,9 +812,13 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--orange);outline-off
     var h="<b>건들북 이용약관</b> ";
     ARTS.forEach(function(a){h+="<b>"+a[0]+"</b> "+a[1]+" "});
     h+="<b>부칙</b> "+ADD.join(" ");
-    if(TERMS)h+="<i>귀하는 "+TERMS.date+" "+(TERMS.how==="read"?"읽고":"읽지 않고")+" 동의하셨습니다.</i>";
+    if(TERMS)h+="<i>귀하는 "+TERMS.date+" "+(TERMS.how==="read"?"읽고":"읽지 않고")+" 동의하셨습니다.";
+    var t=CNT.terms||{},tot=(t.read||0)+(t.skip||0);
+    if(TERMS&&tot>=10)h+=" 이용자의 "+Math.round((t.skip||0)*100/tot)+"%가 읽지 않고 동의했습니다.";
+    if(TERMS)h+="</i>";
     $("#rterms").innerHTML=h;
   }
+  function refreshTerms(){sbGet("terms").then(renderTerms)}
   function openTerms(){
     var h="<h4>건들북 이용약관</h4>";
     ARTS.forEach(function(a){h+='<p><span class="art">'+a[0]+'</span> '+a[1]+'</p>'});
@@ -805,7 +831,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--orange);outline-off
   }
   function agree(how){
     TERMS={how:how,date:dstr(new Date())};try{localStorage.setItem("gundle-terms",JSON.stringify(TERMS))}catch(e){}
-    $("#termsov").classList.remove("on");$("#rc").classList.remove("dim");renderTerms();
+    $("#termsov").classList.remove("on");$("#rc").classList.remove("dim");renderTerms();sbBump("terms",how).then(renderTerms);
     toast(how==="read"?"읽고 동의하셨습니다. 드문 분입니다":"읽지 않고 동의하셨습니다. 환영합니다");
   }
   $("#agree-read").addEventListener("click",function(){agree("read")});
@@ -859,18 +885,16 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--orange);outline-off
     }
     sh.innerHTML=h;
   }
-  var PCOUNT={open:0,skip:0};try{var pc=JSON.parse(localStorage.getItem("gundle-pocket")||"null");if(pc)PCOUNT=pc}catch(e){}
   $("#pocket").addEventListener("click",function(){PST.preset=state.preset;pocketStage(1);$("#pocketov").classList.add("on")});
   document.addEventListener("click",function(e){
     var p=e.target.closest("[data-pp]");if(p){PST.preset=p.dataset.pp;pocketStage(2);return}
     var l=e.target.closest("[data-pl]");if(l){PST.len=l.dataset.pl;pocketStage(2);return}
     var b=e.target.closest("[data-ps]");if(!b)return;
     var v=b.dataset.ps;
-    if(v==="close"){if($("#cheat")===null)PCOUNT.skip++;$("#pocketov").classList.remove("on");save();return}
+    if(v==="close"){if(b.closest(".btns")&&b.textContent==="안 열게요")sbBump("pocket","skip");$("#pocketov").classList.remove("on");return}
     if(v==="copy"){copy($("#cheat").textContent.replace(/\s+/g," ").trim(),"쪽지 복사. 시험장 반입은 책임지지 않습니다");return}
-    if(v==="3")PCOUNT.open++;
-    pocketStage(parseInt(v,10));save();
-    function save(){try{localStorage.setItem("gundle-pocket",JSON.stringify(PCOUNT))}catch(x){}}
+    if(v==="3")sbBump("pocket","open");
+    pocketStage(parseInt(v,10));
   });
   $("#pocketov").addEventListener("click",function(e){if(e.target===this)this.classList.remove("on")});
 
