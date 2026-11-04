@@ -7,9 +7,10 @@
 <meta name="description" content="제목만 아는 책을 3분 만에 대화용으로. 읽지 말고, 건드리세요.">
 <meta property="og:title" content="건들북 — 읽지 말고, 건드리세요.">
 <meta property="og:description" content="제목만 아는 책을 3분 만에 대화용으로. 양심 가격 0원.">
-<meta property="og:image" content="https://wayne4078.github.io/gundle/assets/og.png">
+<meta property="og:image" content="https://gundle.app/assets/og.png">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
-<meta property="og:url" content="https://wayne4078.github.io/gundle/"><meta property="og:type" content="website">
+<meta property="og:url" content="https://gundle.app/">
+<link rel="canonical" href="https://gundle.app/"><meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="assets/logo.png">
 <link rel="apple-touch-icon" href="assets/logo.png">
@@ -305,6 +306,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--orange);outline-off
 .intro .go button{width:100%;background:var(--orange);color:var(--orange-ink);border-radius:12px;padding:16px;font-size:17px;font-weight:700;min-height:56px}
 .intro .sign{text-align:right;font-size:13px;color:var(--ink-2);margin-top:14px;font-family:var(--serif)}
 .pill{cursor:pointer}
+html.toss #rstore{display:none}
 
 /* 빨간 색연필 — 참고서에 줄 긋듯, 위에서부터 한 줄씩 */
 .crayon{position:relative;display:inline;white-space:nowrap}
@@ -479,6 +481,39 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--orange);outline-off
 (function(){
   var $=function(s,r){return (r||document).querySelector(s)};
   var $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
+
+  /* 플랫폼 — 토스 빌드에만 vendor/ait.js(앱인토스 SDK)가 window.AIT로 들어온다. 웹은 같은 코드 그대로. */
+  var AIT=window.AIT||null, IN_TOSS=!!(AIT&&window.ReactNativeWebView), APP_NAME='gundle-book', BUILD='1.0.0', T0=Date.now();
+
+  /* 기록 — track(name, params) 하나로. 개인 정보·직접 쓴 글은 남기지 않는다. ANALYTICS.md 참고 */
+  var EV=(function(){
+    var ls=function(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}};
+    var uid=ls("gundle-uid");if(!uid){uid=Math.random().toString(36).slice(2,10)+Date.now().toString(36);ls("gundle-uid",uid)}
+    var inst=Number(ls("gundle-install"))||0,first=!inst;if(first){inst=Date.now();ls("gundle-install",String(inst))}
+    var kst=function(t){return Math.floor((t+9*3600e3)/864e5)};
+    var sno=(Number(ls("gundle-sno"))||0)+1;ls("gundle-sno",String(sno));
+    var sid=Math.random().toString(36).slice(2,10),seq=0,screen="home",panel=null;
+    function utm(){var q={},src=location.search;try{if(IN_TOSS&&AIT.Environment&&AIT.Environment.initialURL){var u=AIT.Environment.initialURL,i=u.indexOf("?");if(i>=0)src=u.slice(i)}}catch(e){}
+      new URLSearchParams(src).forEach(function(v,k){if(/^utm_/.test(k))q[k]=String(v).slice(0,80)});return q}
+    var U=utm();
+    function track(name,params){
+      var e={name:name,ts:Date.now(),seq:++seq,sid:sid,uid:uid,build:BUILD,platform:IN_TOSS?"toss":"web",lang:"ko",screen:screen,day:kst(Date.now())-kst(inst)};
+      for(var k in params)if(params[k]!==undefined)e[k]=params[k];
+      try{var buf=JSON.parse(ls("gundle-events")||"[]");buf.push(e);ls("gundle-events",JSON.stringify(buf.slice(-300)))}catch(x){}
+      if(IN_TOSS){try{var pr={};for(var k2 in e)if(k2!=="name")pr[k2]=typeof e[k2]==="object"?JSON.stringify(e[k2]):String(e[k2]);AIT.Analytics.log({log_name:name,log_type:"event",params:pr}).catch(function(){})}catch(x){}}
+      try{if(window.gtag)window.gtag("event",name,params||{})}catch(x){}
+      try{if(window.dataLayer)window.dataLayer.push(Object.assign({event:name},params||{}))}catch(x){}
+      if(panel){var row=document.createElement("div");row.textContent=e.seq+" "+name+" "+JSON.stringify(params||{});panel.appendChild(row);while(panel.children.length>14)panel.removeChild(panel.firstChild)}
+    }
+    if(location.hash.indexOf("events")>=0){panel=document.createElement("div");panel.style.cssText="position:fixed;left:6px;bottom:6px;z-index:99;max-width:70vw;font:10px/1.35 monospace;background:rgba(0,0,0,.75);color:#9f9;padding:6px;border-radius:6px;pointer-events:none";document.body.appendChild(panel)}
+    if(first)track("first_open",Object.assign({ref:(document.referrer?(function(){try{return new URL(document.referrer).host}catch(e){return ""}})():"")},U));
+    track("app_open",Object.assign({first:first,session_no:sno},U));
+    var bgAt=0;function bg(){if(bgAt)return;bgAt=Date.now();track("app_background",{session_s:Math.round((Date.now()-T0)/1000)})}
+    document.addEventListener("visibilitychange",function(){if(document.hidden)bg();else if(bgAt){track("app_foreground",{away_s:Math.round((Date.now()-bgAt)/1000)});bgAt=0}});
+    window.addEventListener("pagehide",bg);
+    return {track:track,setScreen:function(x){screen=x},get screen(){return screen}};
+  })();
+  var track=EV.track;
 
   var PRESETS={
     date:{name:"소개팅",label:"상대 인스타에 이 책 사진이 있었습니다.",k:"소개팅 · 상대 인스타에 이 책이 있었을 때"},
@@ -777,6 +812,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--orange);outline-off
   var ORDER=["home","who","three","line","test","receipt"];
   function show(id){
     if(ORDER.indexOf(id)<0)id="home";
+    if(id!==EV.screen){var from=EV.screen;EV.setScreen(id);track("screen_view",{screen:id,from:from,book:id==="home"?undefined:state.book})}
     $$(".screen").forEach(function(s){s.classList.toggle("on",s.id===id)});
     window.scrollTo(0,0);
     if(id==="who"&&!state.t0)startTimer();
@@ -805,6 +841,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--orange);outline-off
   function toast(msg){var t=$("#toast");t.textContent=msg;t.classList.add("show");setTimeout(function(){t.classList.remove("show")},1600)}
   function copy(text,ok){
     var done=function(){toast(ok||"복사했습니다")};
+    if(IN_TOSS){try{AIT.Clipboard.setText(text).then(done,function(){fallback(text);done()});return}catch(e){}}
     if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(done,function(){fallback(text);done()})}else{fallback(text);done()}
   }
   function fallback(text){var ta=document.createElement("textarea");ta.value=text;document.body.appendChild(ta);ta.select();try{document.execCommand("copy")}catch(e){}document.body.removeChild(ta)}
@@ -892,10 +929,21 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--orange);outline-off
     try{localStorage.setItem("gundle-no",String(no))}catch(e){}
     state.t0=null;
     renderTerms();refreshTerms();addPending();
+    var bn=0;try{bn=(Number(localStorage.getItem("gundle-bookno"))||0)+1;localStorage.setItem("gundle-bookno",String(bn))}catch(e){}
+    track("receipt_view",{book:state.book,preset:state.preset,touch_s:s,flipped:n,book_no:bn});
   }
   $("#copyrc").addEventListener("click",function(){
     var rows=$$("#rc .r:not(.danger)").map(function(r){var c=r.children;return c[0].textContent+" … "+c[c.length-1].textContent});
     var txt=$("#rhead").textContent+" "+$("#rno").textContent+"\n"+$("#rtitle").textContent+" "+$("#rauthor").textContent+"\n"+rows.join("\n")+"\n위험 질문: "+$("#rdanger").textContent+"\n내용은 쓸 만하게, 태도는 가볍게. gundle.app";
+    if(IN_TOSS){
+      track("share_click",{book:state.book,as:"toss"});
+      var path="intoss://"+APP_NAME+"?b="+state.book+"&utm_source=share&utm_campaign=receipt";
+      (AIT.Share&&AIT.Share.createLink?AIT.Share.createLink({path:path}):Promise.reject()).catch(function(){return ""}).then(function(link){
+        return AIT.Share.sendMessage({message:txt.replace(" gundle.app","")+(link?"\n"+link:"")});
+      }).then(function(){track("share_done",{book:state.book})},function(){copy(txt,"영수증 복사. 붙여넣어 보내세요")});
+      return;
+    }
+    track("share_click",{book:state.book,as:"copy"});
     copy(txt,"영수증 복사. 스레드에 붙여넣으세요");
   });
 
@@ -1056,8 +1104,47 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--orange);outline-off
   $("#pill").addEventListener("click",function(){$("#intro").classList.add("on");drawCrayons()});
   if(!seen){$("#intro").classList.add("on");(document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(drawCrayons)}
   renderHome();renderBook();renderAsk();
+
+  /* 눌린 것 기록 — 각 기능 코드를 건드리지 않고 한 곳에서 */
+  document.addEventListener("click",function(e){
+    var t=e.target,c;
+    if((c=t.closest("[data-start]")))track("book_start",{book:c.dataset.start,preset:state.preset,from:c.classList.contains("cta")?"today":"shelf"});
+    else if((c=t.closest(".chip[data-p]")))track("preset_change",{to:c.dataset.p});
+    else if((c=t.closest(".more")))track("deep_open",{book:state.book,open:c.getAttribute("aria-expanded")!=="true"});
+    else if((c=t.closest(".flip")))track("flip",{book:state.book,q:Number(c.dataset.q),locked:c.classList.contains("locked")});
+    else if(t.closest("#copyline"))track("line_copy",{book:state.book,preset:state.preset});
+    else if(t.closest("#rstore"))track("store_click",{book:state.book});
+    else if((c=t.closest("[data-poll]")))track("movie_poll",{to:c.dataset.poll});
+    else if((c=t.closest("[data-next]")))track("next_vote",{to:c.dataset.next});
+    else if((c=t.closest("[data-ask]")))track("ask_answer",{to:c.dataset.ask,k:($("#ask")||{}).dataset?$("#ask").dataset.k:undefined});
+    else if(t.closest("#pocket"))track("pocket_open",{book:state.book});
+    else if((c=t.closest("[data-ps]"))){var v=c.dataset.ps;track(v==="3"?"cheat_view":v==="copy"?"cheat_copy":v==="close"?"pocket_close":"pocket_step",{book:state.book,step:v,len:PST.len,preset:PST.preset})}
+    else if((c=t.closest("[data-pl]")))track("cheat_len",{to:c.dataset.pl});
+    else if(t.closest("#agree-read"))track("terms_agree",{how:"read"});
+    else if(t.closest("#agree-skip"))track("terms_agree",{how:"skip"});
+    else if(t.closest("#introgo"))track("intro_close",{wait_s:Math.round((Date.now()-T0)/1000)});
+    else if(t.closest("#pill"))track("intro_reopen",{});
+  },true);
+
+  /* 토스 전용 — 서점 링크 숨김(외부 상거래 링크), 안드로이드 뒤로가기, 받은 링크로 바로 그 책 열기 */
+  if(IN_TOSS){
+    document.documentElement.classList.add("toss");
+    try{AIT.graniteEvent.addEventListener("backEvent",{onEvent:function(){
+      var ov=$(".ov.on");if(ov&&ov.id!=="termsov"){ov.classList.remove("on");return}
+      if($("#intro.on")){$("#introgo").click();return}
+      var cur=EV.screen,i=ORDER.indexOf(cur);
+      if(cur==="home"||i<=0){try{AIT.closeView()}catch(x){}return}
+      show(cur==="who"?"home":ORDER[i-1]);
+    }})}catch(e){}
+  }
+  (function deep(){
+    var src=location.search;try{if(IN_TOSS&&AIT.Environment&&AIT.Environment.initialURL){var u=AIT.Environment.initialURL,i=u.indexOf("?");if(i>=0)src=u.slice(i)}}catch(e){}
+    var b=new URLSearchParams(src).get("b");
+    if(b&&BOOKS[b]&&SHELF.indexOf(b)>=0){track("deeplink_open",{book:b});setTimeout(function(){if(!$("#intro.on")){state.book=b;state.t0=null;state.flipped={};renderBook();show("who")}},0)}
+  })();
   var h=location.hash.slice(1);
   show(h&&h!=="home"&&ORDER.indexOf(h)>0?"home":"home");
+  track("loading_complete",{ms:Date.now()-T0,intro:!!$("#intro.on")});
 })();
 </script>
 
