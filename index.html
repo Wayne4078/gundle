@@ -1129,6 +1129,7 @@ html.toss #rstore{display:none}
   /* 토스 전용 — 서점 링크 숨김(외부 상거래 링크), 안드로이드 뒤로가기, 받은 링크로 바로 그 책 열기 */
   if(IN_TOSS){
     document.documentElement.classList.add("toss");
+    $("#copyrc").textContent="공유하기";$("#rhint").textContent="받은 분은 토스에서 바로 이 책이 열립니다.";
     try{AIT.graniteEvent.addEventListener("backEvent",{onEvent:function(){
       var ov=$(".ov.on");if(ov&&ov.id!=="termsov"){ov.classList.remove("on");return}
       if($("#intro.on")){$("#introgo").click();return}
