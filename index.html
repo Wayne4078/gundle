@@ -317,6 +317,8 @@ html.toss #rstore{display:none}
 .crayon.go path{transition:stroke-dashoffset 2.2s cubic-bezier(.4,.1,.3,1)}
 .crayon.go path{stroke-dashoffset:0}
 @media (prefers-reduced-motion:reduce){.crayon path{stroke-dashoffset:0}.crayon.go path{transition:none}}
+.imgsheet img{display:block;width:100%;max-height:62dvh;object-fit:contain;border-radius:10px;background:#F1ECE2}
+.imgsheet .hint{text-align:center;font-size:16px;margin:12px 0 4px;color:var(--ink-2)}
 </style>
 
 </head>
@@ -431,8 +433,8 @@ html.toss #rstore{display:none}
       <div class="terms" id="rterms"></div>
     </div>
     </div>
-    <div class="racts after"><button class="pri" id="copyrc">텍스트로 복사</button><button data-go="home">다른 책도 3분</button></div>
-    <div class="rhint after" id="rhint">스크린샷해서 스레드·스토리에 올리세요. 자백이 밈입니다.</div>
+    <div class="racts after"><button class="pri" id="saveimg">이미지로 저장</button><button id="copyrc">텍스트로 복사</button></div>
+    <div class="rhint after" id="rhint">저장해서 스토리·스레드에 올리세요. 자백이 밈입니다.</div>
     <div class="poll after">
       <div class="k">한 가지만 여쭐게요</div>
       <div class="q">건들무비, 나와도 될까요?</div>
@@ -442,6 +444,7 @@ html.toss #rstore{display:none}
     <div class="rlinks after">
       <a id="rstore" href="#" target="_blank" rel="noopener">여기까지 왔으면 그냥 읽으세요 <small>서점 ↗</small></a>
       <button data-go="who"><span id="rrestart"></span> <small>1 / 5</small></button>
+      <button data-go="home">다른 책도 3분 <small>책장</small></button>
     </div>
     <button class="pocket after" id="pocket" aria-label="봉인"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9c0-2.8 2.2-5 5-5s5 2.2 5 5c0 1.2-.4 2-1 2.8 1.9 1.3 3 3.3 3 5.7 0 1.4-1.1 2.5-2.5 2.5h-9A2.5 2.5 0 0 1 5 17.5c0-2.4 1.1-4.4 3-5.7C7.4 11 7 10.2 7 9z"/><path d="M8 11.8h8"/><circle cx="12" cy="16" r="1.4" fill="currentColor" stroke="none"/></svg></button>
   </div>
@@ -458,6 +461,7 @@ html.toss #rstore{display:none}
     <div class="hint" id="thint">끝까지 내리시면 버튼이 켜집니다.</div>
   </div>
 </div>
+<div class="ov" id="imgov" role="dialog" aria-modal="true"><div class="sheet imgsheet"><img alt="건들북 영수증"><div class="hint">이미지를 길게 눌러 저장하세요.</div><div class="btns"><button class="pri" data-imgclose>닫기</button></div></div></div>
 <div class="ov" id="pocketov" role="dialog" aria-modal="true">
   <div class="sheet" id="psheet"></div>
 </div>
@@ -948,6 +952,74 @@ html.toss #rstore{display:none}
   });
 
 
+  /* 영수증 이미지 — 스토리 세로(1080×1920). 화면의 영수증을 그대로 옮겨 그린다. */
+  function receiptCanvas(){
+    var W=1080,H=1920,c=document.createElement("canvas");c.width=W;c.height=H;var g=c.getContext("2d");
+    var SANS='"Pretendard","Apple SD Gothic Neo","Noto Sans KR",sans-serif',SERIF='"MaruBuri","Noto Serif KR",serif';
+    var X=150,RW=780,PX=60,L=X+PX,R=X+RW-PX,IW=R-L;
+    function F(w,sz,fam){g.font=w+" "+sz+"px "+fam}
+    function wrap(t,max){var out=[],line="";t.split("").forEach(function(ch){if(g.measureText(line+ch).width>max&&line){out.push(line);line=ch.trim()?ch:""}else line+=ch});if(line)out.push(line);return out}
+    var rows=$$("#rc .r:not(.danger)").map(function(r){var k=r.children;return [k[0].textContent,k[k.length-1].textContent,r.classList.contains("tot")]});
+    var danger=$("#rdanger").textContent,terms=$("#rterms").textContent.replace(/\s+/g," ").trim(),fine=$("#rfine").textContent;
+    F(600,38,SERIF);var dl=wrap(danger,IW);
+    F(400,17,SANS);var tl=wrap(terms,IW);
+    var h=70+60+40+30+90+30+rows.length*66+30+40+dl.length*54+40+100+90+40+tl.length*24+60;
+    var top=Math.max(150,(H-h)/2-40);
+    g.fillStyle="#F1ECE2";g.fillRect(0,0,W,H);
+    g.save();g.shadowColor="rgba(0,0,0,.18)";g.shadowBlur=50;g.shadowOffsetY=24;g.fillStyle="#FFFDF8";
+    g.beginPath();g.moveTo(X,top);g.lineTo(X+RW,top);var zz=26,yb=top+h;g.lineTo(X+RW,yb);
+    for(var zx=X+RW;zx>X;zx-=zz){g.lineTo(zx-zz/2,yb+14);g.lineTo(Math.max(X,zx-zz),yb)}g.closePath();g.fill();g.restore();
+    var y=top+70;g.fillStyle="#222";g.textBaseline="alphabetic";
+    function C(t,yy){g.textAlign="center";g.fillText(t,W/2,yy);g.textAlign="left"}
+    function dash(yy,dot){g.save();g.strokeStyle=dot?"#bbb":"#999";g.lineWidth=3;g.setLineDash(dot?[3,9]:[12,9]);g.beginPath();g.moveTo(L,yy);g.lineTo(R,yy);g.stroke();g.restore()}
+    F(800,50,SANS);g.save();if("letterSpacing" in g)g.letterSpacing="5px";C($("#rhead").textContent,y);g.restore();y+=50;
+    F(400,28,SANS);g.fillStyle="#666";C($("#rno").textContent,y);g.fillStyle="#222";y+=40;dash(y);y+=70;
+    F(600,46,SERIF);g.fillText($("#rtitle").textContent,L,y);F(500,30,SANS);g.fillStyle="#555";g.textAlign="right";g.fillText($("#rauthor").textContent,R,y);g.textAlign="left";g.fillStyle="#222";y+=40;dash(y);y+=66;
+    rows.forEach(function(r){
+      if(r[0]==="양심 가격"){y+=4;dash(y-46);y+=26}
+      F(r[2]?800:400,r[2]?42:36,SANS);var a=g.measureText(r[0]).width,b=g.measureText(r[1]).width;
+      g.fillText(r[0],L,y);g.textAlign="right";g.fillText(r[1],R,y);g.textAlign="left";
+      g.save();g.strokeStyle=r[2]?"#333":"#bbb";g.lineWidth=3;if(!r[2])g.setLineDash([3,9]);g.beginPath();g.moveTo(L+a+16,y-6);g.lineTo(R-b-16,y-6);g.stroke();g.restore();
+      y+=66;
+    });
+    y+=0;F(400,28,SANS);g.fillStyle="#666";g.fillText("위험 질문",L,y);g.fillStyle="#222";y+=52;
+    F(600,38,SERIF);dl.forEach(function(t){g.fillText(t,L,y);y+=54});y+=10;
+    for(var bx=L,i=0;bx<R;i++){var bw=[3,2,5,2,7,3,2,4][i%8],gap=[3,4,2,5,3,2,6,3][(i*3)%8];g.fillRect(bx,y,Math.min(bw,R-bx),90);bx+=bw+gap}y+=140;
+    F(700,30,SANS);C("내용은 쓸 만하게, 태도는 가볍게.",y);y+=42;F(400,28,SANS);g.fillStyle="#444";C(IN_TOSS?"토스에서 「건들북」":"gundle.app",y);y+=44;
+    F(400,24,SANS);g.fillStyle="#777";C(fine,y);y+=44;
+    F(400,17,SANS);g.fillStyle="#9a9a9a";tl.forEach(function(t){g.fillText(t,L,y);y+=24});
+    return c;
+  }
+  function fontsReady(){try{return Promise.all([document.fonts.load('600 40px "MaruBuri"'),document.fonts.load('400 40px "Pretendard"'),document.fonts.load('800 40px "Pretendard"')]).catch(function(){})}catch(e){return Promise.resolve()}}
+  $("#saveimg").addEventListener("click",function(){
+    var btn=this;if(btn.disabled)return;btn.disabled=true;setTimeout(function(){btn.disabled=false},1500);
+    track("save_image_click",{book:state.book,platform:IN_TOSS?"toss":"web"});
+    fontsReady().then(function(){
+      var c=receiptCanvas(),name="gundle-"+state.book+".png";
+      if(IN_TOSS){
+        var f=AIT.File&&AIT.File.saveBase64;
+        if(f&&(!f.isSupported||f.isSupported())){
+          return f({data:c.toDataURL("image/png").split(",")[1],fileName:name,mimeType:"image/png"})
+            .then(function(){track("save_image_done",{book:state.book,as:"album"});toast("사진첩에 저장했습니다. 스토리에 올려 보세요")},function(){showImg(c)});
+        }
+        return showImg(c);
+      }
+      c.toBlob(function(blob){
+        var file=null;try{file=new File([blob],name,{type:"image/png"})}catch(e){}
+        if(file&&navigator.canShare&&navigator.canShare({files:[file]})){
+          navigator.share({files:[file]}).then(function(){track("save_image_done",{book:state.book,as:"share"})},function(){});
+        }else{
+          var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();
+          track("save_image_done",{book:state.book,as:"download"});toast("이미지를 저장했습니다");
+        }
+      },"image/png");
+    });
+  });
+  function showImg(c){
+    var ov=$("#imgov");ov.querySelector("img").src=c.toDataURL("image/png");ov.classList.add("on");
+    track("save_image_done",{book:state.book,as:"longpress"});
+  }
+
   /* 약관 — 3원칙. 보험 약관처럼 작게. 어디에도 "확대해 보세요"라고 쓰지 않는다. */
   var TERMS=null;try{TERMS=JSON.parse(localStorage.getItem("gundle-terms")||"null")}catch(e){}
   var ARTS=[
@@ -960,7 +1032,7 @@ html.toss #rstore{display:none}
     var h="<b>건들북 이용약관</b> ";
     ARTS.forEach(function(a){h+="<b>"+a[0]+"</b> "+a[1]+" "});
     h+="<b>부칙</b> "+ADD.join(" ");
-    if(TERMS)h+="<i>귀하는 "+TERMS.date+" "+(TERMS.how==="read"?"읽고":"읽지 않고")+" 동의하셨습니다.";
+    if(TERMS)h+=" <i>귀하는 "+TERMS.date+" "+(TERMS.how==="read"?"읽고":"읽지 않고")+" 동의하셨습니다.";
     var t=CNT.terms||{},tot=(t.read||0)+(t.skip||0);
     if(TERMS&&tot>=10)h+=" 이용자의 "+Math.round((t.skip||0)*100/tot)+"%가 읽지 않고 동의했습니다.";
     if(TERMS)h+="</i>";
@@ -1045,6 +1117,7 @@ html.toss #rstore{display:none}
     pocketStage(parseInt(v,10));
   });
   $("#pocketov").addEventListener("click",function(e){if(e.target===this)this.classList.remove("on")});
+  $("#imgov").addEventListener("click",function(e){if(e.target===this||e.target.closest("[data-imgclose]"))this.classList.remove("on")});
 
 
   /* 영수증 인쇄 연출 */
